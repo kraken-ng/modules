@@ -6,6 +6,7 @@ import java.util.regex.*;
 
 public class Module_template
 {
+    private String cwd = System.getProperty("user.dir");
     private final String SUCC_CODE = "0";
     private final String ERR_CODE  = "1";
     private final String JAVA_EOL  = getLineSeparator();
@@ -63,12 +64,28 @@ public class Module_template
         return data_string;
     }
 
-    private String normalizePath(String currPath)
+    private String sanitizePath(String currPath)
     {
         currPath = currPath.replace("\"", "");
         currPath = currPath.replace("'", "");
         currPath = currPath.replace("\\", "/");
         return currPath;
+    }
+
+    private String normalizePath(String currPath) throws IOException
+    {
+        currPath = sanitizePath(currPath);
+
+        File filepath = new File(currPath);
+        if (filepath.isAbsolute())
+        {
+            return filepath.getCanonicalPath();
+        }
+        else
+        {
+            File new_filepath = new File(this.cwd + File.separator + currPath);
+            return new_filepath.getCanonicalPath();
+        }
     }
 
     private String[] parseArgs(String args)
@@ -101,7 +118,7 @@ public class Module_template
 
         System.setProperty("user.dir", target_dir.getCanonicalPath());
 
-        return normalizePath(target_dir.getCanonicalPath());
+        return sanitizePath(target_dir.getCanonicalPath());
     }
 
     private String[] doAction(String param_one, String param_two, String param_three)
@@ -113,7 +130,7 @@ public class Module_template
         }
         catch(Exception ex)
         {
-            return new String[]{ERR_CODE, ex.ToString() + JAVA_EOL};
+            return new String[]{ERR_CODE, ex.getMessage() + JAVA_EOL};
         }
         return new String[]{SUCC_CODE, result};
     }
@@ -130,7 +147,7 @@ public class Module_template
     {
         try
         {
-            String new_cwd = changeCWD(hex2str(module_cwd));
+            this.cwd = changeCWD(hex2str(module_cwd));
             String[] args = parseArgs(hex2str(module_args));
             return execute(args);
         }

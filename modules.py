@@ -1193,5 +1193,50 @@ MODULE_COMMANDS = [
         ],
         "dispatcher" : "default",
         "formater" : "columns_header"
+    },
+    {
+        "name" : "mv",
+        "description" : "Move file/s or directory/ies to another destination",
+        "author" : "@secu_x11",
+        "template" : "mv",
+        "examples" : [
+            "mv example.txt demo.txt",
+            "mv example.txt /tmp/example.txt",
+            "mv example.txt /tmp",
+            "mv example.txt /tmp/",
+            "mv somedir otherdir",
+            "mv somedir /tmp/somedir",
+            "mv somedir /tmp",
+            "mv somedir /tmp/",
+            "mv example.txt demo.txt /tmp",
+            "mv example.txt somedir /tmp"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php", "java"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php", "java"]
+            }
+        ],
+        "references" : [],
+        "args": [
+            {
+                "sources": {
+                    "help": "Source files or directories",
+                    "nargs" : "*",
+                    "type":  str
+                },
+                "dest": {
+                    "help": "Destination file or directory",
+                    "nargs": 1,
+                    "type":  str
+                }
+            }
+        ],
+        "dispatcher" : "default",
+        "formater" : "default"
     }
 ]
