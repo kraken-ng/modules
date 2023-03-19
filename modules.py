@@ -1238,5 +1238,26 @@ MODULE_COMMANDS = [
         ],
         "dispatcher" : "default",
         "formater" : "default"
-    }
+    },
+    {
+        "name" : "hotfixes",
+        "description" : "Show hotfixes installed on current computer (via WMI)",
+        "author" : "@the_etnum",
+        "template" : "hotfixes",
+        "examples" : [
+            "hotfixes"
+        ],
+        "so" : [
+            {
+                "name" : "Windows",
+                "agents" : ["cs"]
+            }
+        ],
+        "references" : [
+            "System.Management.dll"
+        ],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
 ]
