@@ -178,45 +178,51 @@ public class Module_execute
 
     private String[] doExecute(String executor, String[] arguments)
     {
-        List<String> commands = new ArrayList<String>();
-        String current_os = getOS();
-        executor = normalizePath(executor);
+        try 
+        {
+            List<String> commands = new ArrayList<String>();
+            String current_os = getOS();
 
-        if (current_os.equals("Windows"))
-        {
-            if (executor.equals(DEFAULT_EMPTY_EXECUTOR))
+            if (current_os.equals("Windows"))
             {
-                commands.add(DEFAULT_WIN_EXECUTOR);
-                commands.add("/c");
-                for (String arg : arguments)
-                    commands.add(arg);
+                if (executor.equals(DEFAULT_EMPTY_EXECUTOR))
+                {
+                    commands.add(DEFAULT_WIN_EXECUTOR);
+                    commands.add("/c");
+                    for (String arg : arguments)
+                        commands.add(arg);
+                }
+                else
+                {
+                    commands.add(executor);
+                    for (String arg : arguments)
+                        commands.add(arg);
+                }
+            }
+            else if (current_os.equals("Unix"))
+            {
+                if (executor.equals(DEFAULT_EMPTY_EXECUTOR))
+                {
+                    for (String arg : arguments)
+                        commands.add(arg);
+                }
+                else
+                {
+                    commands.add(executor);
+                    for (String arg : arguments)
+                        commands.add(arg);
+                }
             }
             else
             {
-                commands.add(executor);
-                for (String arg : arguments)
-                    commands.add(arg);
+                return new String[]{ERR_CODE, "Insupported platform: '" + current_os + "'" + JAVA_EOL};
             }
+            return executeWithProcessBuilder(commands);
         }
-        else if (current_os.equals("Unix"))
+        catch(Exception ex)
         {
-            if (executor.equals(DEFAULT_EMPTY_EXECUTOR))
-            {
-                for (String arg : arguments)
-                    commands.add(arg);
-            }
-            else
-            {
-                commands.add(executor);
-                for (String arg : arguments)
-                    commands.add(arg);
-            }
+            return new String[]{ERR_CODE, "execute: " + ex.getMessage() + JAVA_EOL};
         }
-        else
-        {
-            return new String[]{ERR_CODE, "Insupported platform: '" + current_os + "'" + JAVA_EOL};
-        }
-        return executeWithProcessBuilder(commands);
     }
 
     public String[] execute(String[] args)

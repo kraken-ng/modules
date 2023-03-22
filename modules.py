@@ -500,6 +500,27 @@ MODULE_COMMANDS = [
         "formater" : "default"
     },
     {
+        "name" : "hotfixes",
+        "description" : "Show hotfixes installed on current computer (via WMI)",
+        "author" : "@the_etnum",
+        "template" : "hotfixes",
+        "examples" : [
+            "hotfixes"
+        ],
+        "so" : [
+            {
+                "name" : "Windows",
+                "agents" : ["cs"]
+            }
+        ],
+        "references" : [
+            "System.Management.dll"
+        ],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
         "name" : "id",
         "description" : "Displays information about the currently logged-in user",
         "author" : "@secu_x11",
@@ -656,6 +677,51 @@ MODULE_COMMANDS = [
         "formater" : "default"
     },
     {
+        "name" : "mv",
+        "description" : "Move file/s or directory/ies to another destination",
+        "author" : "@secu_x11",
+        "template" : "mv",
+        "examples" : [
+            "mv example.txt demo.txt",
+            "mv example.txt /tmp/example.txt",
+            "mv example.txt /tmp",
+            "mv example.txt /tmp/",
+            "mv somedir otherdir",
+            "mv somedir /tmp/somedir",
+            "mv somedir /tmp",
+            "mv somedir /tmp/",
+            "mv example.txt demo.txt /tmp",
+            "mv example.txt somedir /tmp"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php", "java"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php", "java"]
+            }
+        ],
+        "references" : [],
+        "args": [
+            {
+                "sources": {
+                    "help": "Source files or directories",
+                    "nargs" : "*",
+                    "type":  str
+                },
+                "dest": {
+                    "help": "Destination file or directory",
+                    "nargs": 1,
+                    "type":  str
+                }
+            }
+        ],
+        "dispatcher" : "default",
+        "formater" : "default"
+    },
+    {
         "name" : "netstat",
         "description" : "Show listening ports, arp table and machine's net routes",
         "author" : "@secu_x11",
@@ -794,6 +860,55 @@ MODULE_COMMANDS = [
         "formater" : "pspy"
     },
     {
+        "name" : "reg_dump_trans",
+        "description" : "Extract a registry key using a Transacted File (SeBackup or Admin rights are required)",
+        "author" : "@secu_x11, @xassiz, @antuache",
+        "template" : "reg_dump_trans",
+        "examples" : [
+            "reg_dump_trans HKEY_LOCAL_MACHINE SAM /tmp/SAM",
+            "reg_dump_trans HKEY_LOCAL_MACHINE SECURITY /tmp/SECURITY",
+            "reg_dump_trans HKEY_LOCAL_MACHINE SYSTEM /tmp/SYSTEM",
+            "reg_dump_trans HKEY_LOCAL_MACHINE SYSTEM\\\\ControlSet001\\\\Control\\\\Lsa /tmp/LSA"
+        ],
+        "so" : [
+            {
+                "name" : "Windows",
+                "agents" : ["cs"]
+            }
+        ],
+        "references": [],
+        "args": [
+            {
+                "root_key": {
+                    "help": "Registry Root Key",
+                    "nargs": 1,
+                    "choices" : [
+                       "HKEY_CLASSES_ROOT",
+                       "HKEY_CURRENT_USER",
+                       "HKEY_LOCAL_MACHINE",
+                       "HKEY_USERS",
+                       "HKEY_PERFORMANCE_DATA",
+                       "HKEY_CURRENT_CONFIG",
+                       "HKEY_DYN_DATA"
+                    ],
+                    "type":  str
+                },
+                "sub_key": {
+                    "help": "Name of the Registry Sub Key to be extracted",
+                    "nargs": 1,
+                    "type":  str
+                },
+                "reg_file": {
+                    "help": "Local Filepath to write Registry Key content",
+                    "nargs": 1,
+                    "type":  str
+                }
+            }
+        ],
+        "dispatcher" : "reg_dump_trans",
+        "formater" : "default"
+    },
+    {
         "name" : "rm",
         "description" : "Remove file or multiple files",
         "author" : "@secu_x11",
@@ -870,43 +985,6 @@ MODULE_COMMANDS = [
         ],
         "dispatcher" : "default",
         "formater" : "columns_header"
-    },
-    {
-        "name" : "secretsdump",
-        "description" : "Extract LSA Secrets from Registry (admin privs and high integrity needed)",
-        "author" : "@_kudaes_, @antuache, @secu_x11",
-        "template" : "secretsdump",
-        "examples" : [
-            "secretsdump /tmp/SAM /tmp/SECURITY /tmp/SYSTEM"
-        ],
-        "so" : [
-            {
-                "name" : "Windows",
-                "agents" : ["cs"]
-            }
-        ],
-        "references" : [],
-        "args": [
-            {
-                "sam_file": {
-                    "help": "Local Filepath to write SAM content",
-                    "nargs": 1,
-                    "type":  str
-                },
-                "security_file": {
-                    "help": "Local Filepath to write SECURITY content",
-                    "nargs": 1,
-                    "type":  str
-                },
-                "system_file": {
-                    "help": "Local Filepath to write SYSTEM content",
-                    "nargs": 1,
-                    "type":  str
-                }
-            }
-        ],
-        "dispatcher" : "secretsdump",
-        "formater" : "default"
     },
     {
         "name" : "set_token",
@@ -1193,71 +1271,5 @@ MODULE_COMMANDS = [
         ],
         "dispatcher" : "default",
         "formater" : "columns_header"
-    },
-    {
-        "name" : "mv",
-        "description" : "Move file/s or directory/ies to another destination",
-        "author" : "@secu_x11",
-        "template" : "mv",
-        "examples" : [
-            "mv example.txt demo.txt",
-            "mv example.txt /tmp/example.txt",
-            "mv example.txt /tmp",
-            "mv example.txt /tmp/",
-            "mv somedir otherdir",
-            "mv somedir /tmp/somedir",
-            "mv somedir /tmp",
-            "mv somedir /tmp/",
-            "mv example.txt demo.txt /tmp",
-            "mv example.txt somedir /tmp"
-        ],
-        "so" : [
-            {
-                "name" : "Linux",
-                "agents" : ["php", "java"]
-            },
-            {
-                "name" : "Windows",
-                "agents" : ["php", "java"]
-            }
-        ],
-        "references" : [],
-        "args": [
-            {
-                "sources": {
-                    "help": "Source files or directories",
-                    "nargs" : "*",
-                    "type":  str
-                },
-                "dest": {
-                    "help": "Destination file or directory",
-                    "nargs": 1,
-                    "type":  str
-                }
-            }
-        ],
-        "dispatcher" : "default",
-        "formater" : "default"
-    },
-    {
-        "name" : "hotfixes",
-        "description" : "Show hotfixes installed on current computer (via WMI)",
-        "author" : "@the_etnum",
-        "template" : "hotfixes",
-        "examples" : [
-            "hotfixes"
-        ],
-        "so" : [
-            {
-                "name" : "Windows",
-                "agents" : ["cs"]
-            }
-        ],
-        "references" : [
-            "System.Management.dll"
-        ],
-        "args": [],
-        "dispatcher" : "default",
-        "formater" : "columns_header"
-    },
+    }
 ]

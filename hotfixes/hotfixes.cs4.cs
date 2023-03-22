@@ -106,15 +106,15 @@ public class Module_hotfixes
 
         try
         {
-			string wmiQuery = "SELECT * FROM Win32_QuickFixEngineering";
-			ManagementObjectSearcher searcher = new ManagementObjectSearcher(wmiQuery);
-			ManagementObjectCollection results = searcher.Get();
-			
-			foreach (ManagementObject hotfix in results)
-			{
-				result += hotfix["HotFixID"].ToString() + "\t" + hotfix["Description"].ToString() + "\t" + hotfix["InstalledOn"].ToString() + Environment.NewLine;
-			}
-		}
+            string wmiQuery = "SELECT * FROM Win32_QuickFixEngineering";
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(wmiQuery);
+            ManagementObjectCollection results = searcher.Get();
+            
+            foreach (ManagementObject hotfix in results)
+            {
+                result += hotfix["HotFixID"].ToString() + "\t" + hotfix["Description"].ToString() + "\t" + hotfix["InstalledOn"].ToString() + Environment.NewLine;
+            }
+        }
         catch(Exception ex)
         {
             result += ex.ToString() + Environment.NewLine;
@@ -126,7 +126,7 @@ public class Module_hotfixes
 
     public string[] execute(string[] args)
     {
-		return doGetHotfixes();
+        return doGetHotfixes();
     }
 
     public string[] go(string cwd, string args, string token)

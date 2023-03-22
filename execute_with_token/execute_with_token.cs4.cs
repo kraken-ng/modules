@@ -264,6 +264,20 @@ public class Module_execute_with_token
         string lpCurrentDirectory,
         [In] ref STARTUPINFO lpStartupInfo,
         out PROCESS_INFORMATION lpProcessInformation);
+    
+    [DllImport("advapi32.dll", SetLastError=true, CharSet=CharSet.Unicode)]
+	public static extern bool CreateProcessAsUser(
+        IntPtr hToken,
+        string lpApplicationName,
+        string lpCommandLine,
+        IntPtr lpProcessAttributes,
+        IntPtr lpThreadAttributes,
+        bool bInheritHandles,
+        CreationFlags dwCreationFlags,
+        IntPtr lpEnvironment,
+        string lpCurrentDirectory,
+        ref STARTUPINFO lpStartupInfo,
+        out PROCESS_INFORMATION lpProcessInformation);
 
     [DllImport("kernel32.dll", SetLastError = true)]
 	public static extern IntPtr CreatePipe(
@@ -332,22 +346,6 @@ public class Module_execute_with_token
             int mod_token_int = Int32.Parse(token);
             IntPtr tokenHandle = new IntPtr(mod_token_int);
 
-            if (!ImpersonateLoggedOnUser(tokenHandle))
-            {
-                CloseHandle(tokenHandle);
-                var errorCode = Marshal.GetLastWin32Error();
-                throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
-            }
-
-            using (WindowsIdentity wid = WindowsIdentity.GetCurrent())
-            {
-                result += "[+] Impersonate Identity from target process. Current user is: " + wid.Name + Environment.NewLine;
-            }
-
-            RevertToSelf();
-
-            result += "[+] RevertToSelf() successfull" + Environment.NewLine;
-
             var securityAttr = new SECURITY_ATTRIBUTES();
             if (!DuplicateTokenEx(tokenHandle, 
                                     TOKEN_ELEVATION,
@@ -385,17 +383,31 @@ public class Module_execute_with_token
             si.cb = Marshal.SizeOf(typeof(STARTUPINFO));
             si.hStdOutput = out_write;
             si.hStdError = err_write;
-            si.lpDesktop = @"WinSta0\Default";
             si.dwFlags |= 0x00000100;
 
             string filename = executor;
             string fileargs = arguments;
 
-            if (!CreateProcessWithTokenW(duplicateTokenHandle,
-                                            LogonFlags.WithProfile, 
+            IntPtr htok = IntPtr.Zero;
+            Process currentProcess = Process.GetCurrentProcess();
+            var target_proc_handle = currentProcess.Handle;
+            if (!OpenProcessToken(target_proc_handle, TokenAccessLevels.Query | TokenAccessLevels.AdjustPrivileges | TokenAccessLevels.AssignPrimary, out htok))
+            {
+                var errorCode = Marshal.GetLastWin32Error();
+                throw new Exception("OpenProcessToken failed with the following error: " + errorCode);
+            }
+
+            SetPrivilege(htok, "SeAssignPrimaryTokenPrivilege", true);
+            SetPrivilege(htok, "SeIncreaseQuotaPrivilege", true);
+            CloseHandle(htok);
+
+            if (!CreateProcessAsUser(duplicateTokenHandle,
                                             filename,
                                             fileargs,
-                                            CreationFlags.None,
+                                            IntPtr.Zero,
+                                            IntPtr.Zero,
+                                            true,
+                                            CreationFlags.NoConsole,
                                             IntPtr.Zero,
                                             Path.GetDirectoryName(filename),
                                             ref si,
@@ -404,10 +416,10 @@ public class Module_execute_with_token
                 CloseHandle(tokenHandle);
                 CloseHandle(duplicateTokenHandle);
                 var errorCode = Marshal.GetLastWin32Error();
-                throw new Exception("CreateProcessWithTokenW failed with the following error: " + errorCode);
+                throw new Exception("CreateProcessAsUser failed with the following error: " + errorCode);
             }
 
-            result += "[+] CreateProcessWithTokenW() successfull launch new process" + Environment.NewLine;
+            result += "[+] CreateProcessAsUser() successfull launch new process" + Environment.NewLine;
             result += Environment.NewLine;
 
             CloseHandle(out_write);

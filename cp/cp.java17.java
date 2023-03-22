@@ -126,55 +126,64 @@ public class Module_cp
     private String[] doCopy(String[] ins, String dest)
     {
         String result = "";
+        String retcode = SUCC_CODE;
 
-        dest = normalizePath(dest);
-        File dest_file = new File(dest).getAbsoluteFile();
-        if ((ins.length > 1) && (dest_file.isDirectory() == false))
-            return new String[]{ERR_CODE, "cp: target '" + dest + "' is not a directory" + JAVA_EOL};
-
-        for (String infile : ins)
+        try
         {
-            try
-            {
-                String in_file_path = "";
-                String dest_file_path = "";
-                infile = normalizePath(infile);
-                File input_file = new File(infile).getAbsoluteFile();
+            dest = normalizePath(dest);
+            File dest_file = new File(dest).getAbsoluteFile();
+            if ((ins.length > 1) && (dest_file.isDirectory() == false))
+                return new String[]{ERR_CODE, "cp: target '" + dest + "' is not a directory" + JAVA_EOL};
 
-                if (dest_file.isDirectory())
-                {
-                    File tmp_file = new File(dest_file + File.separator + input_file.getName());
-                    dest_file_path = tmp_file.getCanonicalPath();
-                }
-                else
-                {
-                    dest_file_path = dest_file.getCanonicalPath();
-                }
-                
-                if (input_file.exists() == false)
-                {
-                    result += "cp: cannot stat '" + infile + "': File does not exist" + JAVA_EOL;
-                    continue;
-                }
-
-                if (input_file.canRead() == false)
-                {
-                    result += "cp: cannot stat '" + infile + "': Permission denied" + JAVA_EOL;
-                    continue;
-                }
-                
-                in_file_path = input_file.getCanonicalPath();
-                Path pathIn  = (Path)Paths.get(in_file_path);
-                Path pathOut = (Path)Paths.get(dest_file_path);
-                Files.copy(pathIn, pathOut, StandardCopyOption.REPLACE_EXISTING);
-            }
-            catch(Exception ex)
+            for (String infile : ins)
             {
-                return new String[]{ERR_CODE, "cp: " + ex.getMessage() + JAVA_EOL};
+                try
+                {
+                    String in_file_path = "";
+                    String dest_file_path = "";
+                    infile = normalizePath(infile);
+                    File input_file = new File(infile).getAbsoluteFile();
+
+                    if (dest_file.isDirectory())
+                    {
+                        File tmp_file = new File(dest_file + File.separator + input_file.getName());
+                        dest_file_path = tmp_file.getCanonicalPath();
+                    }
+                    else
+                    {
+                        dest_file_path = dest_file.getCanonicalPath();
+                    }
+                    
+                    if (input_file.exists() == false)
+                    {
+                        result += "cp: cannot stat '" + infile + "': File does not exist" + JAVA_EOL;
+                        continue;
+                    }
+
+                    if (input_file.canRead() == false)
+                    {
+                        result += "cp: cannot stat '" + infile + "': Permission denied" + JAVA_EOL;
+                        continue;
+                    }
+                    
+                    in_file_path = input_file.getCanonicalPath();
+                    Path pathIn  = (Path)Paths.get(in_file_path);
+                    Path pathOut = (Path)Paths.get(dest_file_path);
+                    Files.copy(pathIn, pathOut, StandardCopyOption.REPLACE_EXISTING);
+                }
+                catch(Exception ex)
+                {
+                    retcode = ERR_CODE;
+                    result += "cp: " + infile + ": Failed";
+                }
             }
         }
+        catch(Exception ex)
+        {
+            return new String[]{ERR_CODE, "cp: " + ex.getMessage() + JAVA_EOL};
+        }
 
-        return new String[]{SUCC_CODE, result};
+        return new String[]{retcode, result};
     }
 
     public String[] execute(String[] args)
