@@ -37,7 +37,7 @@ public class Module_download
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -140,9 +140,9 @@ public class Module_download
     private byte[] readChunk(string filepath, int chunk_size, int seek)
     {
         byte[] data;
-        using (var stream = File.Open(filepath, FileMode.Open, FileAccess.Read))
+        using (FileStream stream = File.Open(filepath, FileMode.Open, FileAccess.Read))
         {
-            using (var reader = new BinaryReader(stream))
+            using (BinaryReader reader = new BinaryReader(stream))
             {
                 reader.BaseStream.Seek(seek, SeekOrigin.Begin);
                 data = reader.ReadBytes(chunk_size);
@@ -153,9 +153,9 @@ public class Module_download
 
     private string getMd5File(string fileName)
     {
-        using (var md5 = MD5.Create())
+        using (MD5 md5 = MD5.Create())
         {
-            using (var stream = File.OpenRead(fileName))
+            using (FileStream stream = File.OpenRead(fileName))
             {
                 string checksum = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty);
                 return checksum.ToLower();

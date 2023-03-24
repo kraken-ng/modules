@@ -35,7 +35,7 @@ public class Module_sysinfo
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -122,8 +122,8 @@ public class Module_sysinfo
 
     private string getIPAddress()
     {
-        var host = Dns.GetHostEntry(Dns.GetHostName());
-        foreach (var ip in host.AddressList)
+        IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (IPAddress ip in host.AddressList)
         {
             if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             {
@@ -152,17 +152,17 @@ public class Module_sysinfo
 
     private string getOS()
     {
-		string osstr = "";
+        string osstr = "";
 
-        var os = Environment.OSVersion;
+        OperatingSystem os = Environment.OSVersion;
         osstr += os.VersionString;
         osstr += " ";
 
         if (is64Bits())
-		    osstr += "x64";
+            osstr += "x64";
         else
             osstr += "x32";
-		return osstr;
+        return osstr;
     }
 
     private string[] doSysInfo()
@@ -189,7 +189,7 @@ public class Module_sysinfo
 
     public string[] execute(string[] args)
     {
-		return doSysInfo();
+        return doSysInfo();
     }
 
     public string[] go(string cwd, string args, string token)

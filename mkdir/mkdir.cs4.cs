@@ -33,7 +33,7 @@ public class Module_mkdir
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -131,7 +131,7 @@ public class Module_mkdir
     {
         string result = "";
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count == 0)
         {
             result = "Invalid arguments provided. Specify one or multiple directories to be created.";

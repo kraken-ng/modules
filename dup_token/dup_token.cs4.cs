@@ -35,7 +35,7 @@ public class Module_dup_token
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -101,26 +101,26 @@ public class Module_dup_token
     }
 
     [StructLayout(LayoutKind.Sequential)]
-	public struct SECURITY_ATTRIBUTES
-	{
-	    public int nLength;
-	    public IntPtr lpSecurityDescriptor;
-	    public int bInheritHandle;
-	}
-	
-	public enum TOKEN_TYPE
-	{
-	    TokenPrimary = 1,
-	    TokenImpersonation
-	}
-	
-	public enum SECURITY_IMPERSONATION_LEVEL
-	{
-	    SecurityAnonymous,
-	    SecurityIdentification,
-	    SecurityImpersonation,
-	    SecurityDelegation
-	}
+    public struct SECURITY_ATTRIBUTES
+    {
+        public int nLength;
+        public IntPtr lpSecurityDescriptor;
+        public int bInheritHandle;
+    }
+    
+    public enum TOKEN_TYPE
+    {
+        TokenPrimary = 1,
+        TokenImpersonation
+    }
+    
+    public enum SECURITY_IMPERSONATION_LEVEL
+    {
+        SecurityAnonymous,
+        SecurityIdentification,
+        SecurityImpersonation,
+        SecurityDelegation
+    }
 
     [Flags]
     public enum ProcessAccessFlags : uint
@@ -153,14 +153,14 @@ public class Module_dup_token
         TokenAccessLevels DesiredAccess,
         out IntPtr TokenHandle);
 
-	[DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-	public extern static bool DuplicateTokenEx(
-	    IntPtr hExistingToken,
-	    uint dwDesiredAccess,
-	    ref SECURITY_ATTRIBUTES lpTokenAttributes,
-	    SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
-	    TOKEN_TYPE TokenType,
-	    out IntPtr phNewToken);
+    [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    public extern static bool DuplicateTokenEx(
+        IntPtr hExistingToken,
+        uint dwDesiredAccess,
+        ref SECURITY_ATTRIBUTES lpTokenAttributes,
+        SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
+        TOKEN_TYPE TokenType,
+        out IntPtr phNewToken);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -179,7 +179,7 @@ public class Module_dup_token
         bool flag = false;
         using(WindowsIdentity identity = WindowsIdentity.GetCurrent())
         {
-            var principal = new WindowsPrincipal(identity);
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
             flag = principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
         return flag;
@@ -204,18 +204,18 @@ public class Module_dup_token
             target_proc_handle = OpenProcess((uint)ProcessAccessFlags.QueryLimitedInformation, true, target_proc_id);
             if (target_proc_handle == IntPtr.Zero)
             {
-                var errorCode = Marshal.GetLastWin32Error();
+                int errorCode = Marshal.GetLastWin32Error();
                 throw new Exception("OpenProcess failed with the following error: " + errorCode);
             }
 
             if (!OpenProcessToken(target_proc_handle, TokenAccessLevels.Query | TokenAccessLevels.Duplicate | TokenAccessLevels.AssignPrimary, out target_proc_token))
             {
-                var errorCode = Marshal.GetLastWin32Error();
+                int errorCode = Marshal.GetLastWin32Error();
                 throw new Exception("OpenProcessToken failed with the following error: " + errorCode);
             }
 
-            var dwTokenRights = 395U;
-            var securityAttr = new SECURITY_ATTRIBUTES();
+            uint dwTokenRights = 395U;
+            SECURITY_ATTRIBUTES securityAttr = new SECURITY_ATTRIBUTES();
             IntPtr dup_token = IntPtr.Zero;
 
             if (!DuplicateTokenEx(target_proc_token, 
@@ -225,7 +225,7 @@ public class Module_dup_token
                                     TOKEN_TYPE.TokenPrimary, 
                                     out dup_token))
             {
-                var errorCode = Marshal.GetLastWin32Error();
+                int errorCode = Marshal.GetLastWin32Error();
                 CloseHandle(target_proc_token);
                 throw new Exception("DuplicateTokenEx failed with the following error: " + errorCode);
             }

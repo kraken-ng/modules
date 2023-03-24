@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 
 using System.Security.Cryptography;
+using System.Globalization;
 
 
 public class Module_upload
@@ -37,7 +38,7 @@ public class Module_upload
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -140,14 +141,14 @@ public class Module_upload
         if (hex.Length % 2 == 1)
             throw new Exception("the binary key cannot have an odd number of digits");
 
-        byte[] arr = new byte[hex.Length >> 1];
-
-        for (int i = 0; i < hex.Length >> 1; ++i)
+        byte[] data = new byte[hex.Length / 2];
+        for (int index = 0; index < data.Length; index++)
         {
-            arr[i] = (byte)((getHexVal(hex[i << 1]) << 4) + (getHexVal(hex[(i << 1) + 1])));
+            string byteValue = hex.Substring(index * 2, 2);
+            data[index] = byte.Parse(byteValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
         }
 
-        return arr;
+        return data;
     }
 
     private string ByteArrayToString(byte[] ba)
@@ -160,9 +161,9 @@ public class Module_upload
 
     private void writeChunk(string filepath, byte[] chunk_data, int seek)
     {
-        using (var stream = File.Open(filepath, FileMode.Append, FileAccess.Write))
+        using (FileStream stream = File.Open(filepath, FileMode.Append, FileAccess.Write))
         {
-            using (var writer = new BinaryWriter(stream))
+            using (BinaryWriter writer = new BinaryWriter(stream))
             {
                 writer.Seek(seek, SeekOrigin.Begin);
                 writer.Write(chunk_data);
@@ -172,9 +173,9 @@ public class Module_upload
 
     private string getMd5File(string fileName)
     {
-        using (var md5 = MD5.Create())
+        using (MD5 md5 = MD5.Create())
         {
-            using (var stream = File.OpenRead(fileName))
+            using (FileStream stream = File.OpenRead(fileName))
             {
                 string checksum = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty);
                 return checksum.ToLower();

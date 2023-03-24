@@ -37,7 +37,7 @@ public class Module_impersonate
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -164,7 +164,7 @@ public class Module_impersonate
     {
         string result = "";
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count != 3)
         {
             result = "Invalid arguments provided. Specify: <DOMAIN> <USERNAME> and <PASSWORD> to impersonate user" + Environment.NewLine;

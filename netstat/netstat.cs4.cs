@@ -13,12 +13,12 @@ using System.Net.NetworkInformation;
 
 public class MyConnection
 {
-    public string proto { get; set; }
-    public string local_addr { get; set; }
-    public int    local_port { get; set; }
-    public string remote_addr { get; set; }
-    public int    remote_port { get; set; }
-    public string state { get; set; }
+    public string proto;
+    public string local_addr;
+    public int    local_port;
+    public string remote_addr;
+    public int    remote_port;
+    public string state;
 
     public const string SEPARATOR = "\t";
 
@@ -79,7 +79,7 @@ public class Module_netstat
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -240,7 +240,7 @@ public class Module_netstat
     {
         string result = "";		
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count != 1)
         {
             result = "Invalid arguments provided. Use netstat -[l|a|r]" + Environment.NewLine;

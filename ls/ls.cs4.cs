@@ -36,7 +36,7 @@ public class Module_ls
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -114,7 +114,7 @@ public class Module_ls
 
         try
         {
-            using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
             {
                 permissions += "r";
             }
@@ -126,7 +126,7 @@ public class Module_ls
 
         try
         {
-            using (var fs = new FileStream(file, FileMode.Open, FileAccess.ReadWrite))
+            using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.ReadWrite))
             {
                 permissions += "w";
             }
@@ -250,7 +250,7 @@ public class Module_ls
         bool recursive = false;
         List<string> nargs = new List<string>(args);
         List<string> files = new List<string>();
-		
+
         if (nargs.Count > 0)
         {
             if (nargs[0].Equals("-R"))
@@ -266,7 +266,8 @@ public class Module_ls
 
         if (files.Count == 0)
         {
-            files = new List<string>(){ CURRENT_DIRECTORY };
+            files = new List<string>();
+            files.Add(CURRENT_DIRECTORY);
         }
 
         foreach (string file in files)

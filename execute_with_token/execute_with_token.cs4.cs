@@ -36,7 +36,7 @@ public class Module_execute_with_token
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -135,46 +135,46 @@ public class Module_execute_with_token
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-	public struct TokPriv1Luid
-	{
-	    public int Count;
-	    public long Luid;
-	    public int Attr;
-	}
+    public struct TokPriv1Luid
+    {
+        public int Count;
+        public long Luid;
+        public int Attr;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-	public struct SECURITY_ATTRIBUTES
-	{
-	    public int nLength;
-	    public IntPtr lpSecurityDescriptor;
-	    public int bInheritHandle;
-	}
-	
-	public enum TOKEN_TYPE
-	{
-	    TokenPrimary = 1,
-	    TokenImpersonation
-	}
-	
-	public enum SECURITY_IMPERSONATION_LEVEL
-	{
-	    SecurityAnonymous,
-	    SecurityIdentification,
-	    SecurityImpersonation,
-	    SecurityDelegation
-	}
+    public struct SECURITY_ATTRIBUTES
+    {
+        public int nLength;
+        public IntPtr lpSecurityDescriptor;
+        public int bInheritHandle;
+    }
+    
+    public enum TOKEN_TYPE
+    {
+        TokenPrimary = 1,
+        TokenImpersonation
+    }
+    
+    public enum SECURITY_IMPERSONATION_LEVEL
+    {
+        SecurityAnonymous,
+        SecurityIdentification,
+        SecurityImpersonation,
+        SecurityDelegation
+    }
 
     public enum CreationFlags
-	{
-	    NoConsole = 0x08000000,
+    {
+        NoConsole = 0x08000000,
         None = 0x00000000
-	}
+    }
 
     public enum LogonFlags
-	{
-	    WithProfile = 1,
-	    NetCredentialsOnly
-	}
+    {
+        WithProfile = 1,
+        NetCredentialsOnly
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct PROCESS_INFORMATION
@@ -219,13 +219,13 @@ public class Module_execute_with_token
     public static extern IntPtr GetCurrentProcess();
 
     [DllImport("advapi32.dll", SetLastError = true)]
-	public static extern bool LookupPrivilegeValue(
+    public static extern bool LookupPrivilegeValue(
         string host,
         string name,
         ref long pluid);
     
     [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
-	public static extern bool AdjustTokenPrivileges(
+    public static extern bool AdjustTokenPrivileges(
         IntPtr htok,
         bool disall,
         ref TokPriv1Luid newst,
@@ -244,17 +244,17 @@ public class Module_execute_with_token
     public static extern bool CloseHandle(
         IntPtr hObject);
 
-	[DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-	public static extern bool DuplicateTokenEx(
-	    IntPtr hExistingToken,
-	    uint dwDesiredAccess,
-	    ref SECURITY_ATTRIBUTES lpTokenAttributes,
-	    SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
-	    TOKEN_TYPE TokenType,
-	    out IntPtr phNewToken);
+    [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    public static extern bool DuplicateTokenEx(
+        IntPtr hExistingToken,
+        uint dwDesiredAccess,
+        ref SECURITY_ATTRIBUTES lpTokenAttributes,
+        SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
+        TOKEN_TYPE TokenType,
+        out IntPtr phNewToken);
     
     [DllImport("advapi32", SetLastError = true, CharSet = CharSet.Unicode)]
-	public static extern bool CreateProcessWithTokenW(
+    public static extern bool CreateProcessWithTokenW(
         IntPtr hToken,
         LogonFlags dwLogonFlags,
         string lpApplicationName,
@@ -266,7 +266,7 @@ public class Module_execute_with_token
         out PROCESS_INFORMATION lpProcessInformation);
     
     [DllImport("advapi32.dll", SetLastError=true, CharSet=CharSet.Unicode)]
-	public static extern bool CreateProcessAsUser(
+    public static extern bool CreateProcessAsUser(
         IntPtr hToken,
         string lpApplicationName,
         string lpCommandLine,
@@ -280,20 +280,20 @@ public class Module_execute_with_token
         out PROCESS_INFORMATION lpProcessInformation);
 
     [DllImport("kernel32.dll", SetLastError = true)]
-	public static extern IntPtr CreatePipe(
+    public static extern IntPtr CreatePipe(
         ref IntPtr hReadPipe,
         ref IntPtr hWritePipe,
         ref SECURITY_ATTRIBUTES lpPipeAttributes,
         Int32 nSize);
-	
+    
     [DllImport("kernel32.dll", SetLastError = true)]
-	public static extern bool SetHandleInformation(
+    public static extern bool SetHandleInformation(
         IntPtr hObject,
         int dwMask,
         int dwFlags);
 
     [DllImport("kernel32.dll", SetLastError = true)]
-	public static extern bool ReadFile(
+    public static extern bool ReadFile(
         IntPtr hFile,
         byte[] lpBuffer,
         int nNumberOfBytesToRead,
@@ -314,7 +314,7 @@ public class Module_execute_with_token
 
         if (!LookupPrivilegeValue(null, PrivilegeName, ref tp.Luid))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("LookupPrivilegeValue failed with the following error: " + errorCode);
         }
 
@@ -325,7 +325,7 @@ public class Module_execute_with_token
 
         if (!AdjustTokenPrivileges(htok, false, ref tp, 256, IntPtr.Zero, IntPtr.Zero))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("LookupPrivilegeValue failed with the following error: " + errorCode);
         }
 
@@ -346,7 +346,7 @@ public class Module_execute_with_token
             int mod_token_int = Int32.Parse(token);
             IntPtr tokenHandle = new IntPtr(mod_token_int);
 
-            var securityAttr = new SECURITY_ATTRIBUTES();
+            SECURITY_ATTRIBUTES securityAttr = new SECURITY_ATTRIBUTES();
             if (!DuplicateTokenEx(tokenHandle, 
                                     TOKEN_ELEVATION,
                                     ref securityAttr,
@@ -355,14 +355,14 @@ public class Module_execute_with_token
                                     out duplicateTokenHandle))
             {
                 CloseHandle(tokenHandle);
-                var errorCode = Marshal.GetLastWin32Error();
+                int errorCode = Marshal.GetLastWin32Error();
                 throw new Exception("DuplicateTokenEx failed with the following error: " + errorCode);
             }
 
             result += "[+] DuplicateTokenEx() successfull obtain primary token from target process" + Environment.NewLine;
 
-            var si = new STARTUPINFO();
-	        var pi = new PROCESS_INFORMATION();
+            STARTUPINFO si = new STARTUPINFO();
+            PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
             SECURITY_ATTRIBUTES saAttr = new SECURITY_ATTRIBUTES();
             saAttr.nLength = Marshal.SizeOf(typeof(SECURITY_ATTRIBUTES));
             saAttr.bInheritHandle = 0x1;
@@ -390,10 +390,10 @@ public class Module_execute_with_token
 
             IntPtr htok = IntPtr.Zero;
             Process currentProcess = Process.GetCurrentProcess();
-            var target_proc_handle = currentProcess.Handle;
+            IntPtr target_proc_handle = currentProcess.Handle;
             if (!OpenProcessToken(target_proc_handle, TokenAccessLevels.Query | TokenAccessLevels.AdjustPrivileges | TokenAccessLevels.AssignPrimary, out htok))
             {
-                var errorCode = Marshal.GetLastWin32Error();
+                int errorCode = Marshal.GetLastWin32Error();
                 throw new Exception("OpenProcessToken failed with the following error: " + errorCode);
             }
 
@@ -415,7 +415,7 @@ public class Module_execute_with_token
             {
                 CloseHandle(tokenHandle);
                 CloseHandle(duplicateTokenHandle);
-                var errorCode = Marshal.GetLastWin32Error();
+                int errorCode = Marshal.GetLastWin32Error();
                 throw new Exception("CreateProcessAsUser failed with the following error: " + errorCode);
             }
 
@@ -423,7 +423,7 @@ public class Module_execute_with_token
             result += Environment.NewLine;
 
             CloseHandle(out_write);
-	        CloseHandle(err_write);
+            CloseHandle(err_write);
 
             byte[] buf = new byte[4096];
             int dwRead = 0;
@@ -437,7 +437,7 @@ public class Module_execute_with_token
             }
             
             CloseHandle(out_read);
-	        CloseHandle(err_read);
+            CloseHandle(err_read);
 
             CloseHandle(tokenHandle);
             CloseHandle(duplicateTokenHandle);
@@ -455,7 +455,7 @@ public class Module_execute_with_token
     {
         string result = "";
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count < 2)
         {
             result = "Invalid arguments provided. Specify pid, executor and arguments" + Environment.NewLine;

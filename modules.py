@@ -700,7 +700,7 @@ MODULE_COMMANDS = [
             },
             {
                 "name" : "Windows",
-                "agents" : ["php", "java"]
+                "agents" : ["php", "java", "cs"]
             }
         ],
         "references" : [],

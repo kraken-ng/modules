@@ -35,7 +35,7 @@ public class Module_reg_dump_trans
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -297,21 +297,20 @@ public class Module_reg_dump_trans
         LUID luid = new LUID();
         if (!LookupPrivilegeValue(null, PrivilegeName, out luid))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("LookupPrivilegeValue failed with the following error: " + errorCode);
         }
         
-        PRIVILEGE_SET privs = new PRIVILEGE_SET {
-            Privilege = new LUID_AND_ATTRIBUTES[1],
-            Control = PRIVILEGE_SET.PRIVILEGE_SET_ALL_NECESSARY,
-            PrivilegeCount = 1
-        };
+        PRIVILEGE_SET privs = new PRIVILEGE_SET();
+        privs.Privilege = new LUID_AND_ATTRIBUTES[1];
+        privs.Control = PRIVILEGE_SET.PRIVILEGE_SET_ALL_NECESSARY;
+        privs.PrivilegeCount = 1;
         privs.Privilege[0].Luid = luid;
         privs.Privilege[0].Attributes = SE_PRIVILEGE_ENABLED;
         
         if (!PrivilegeCheck(hToken, ref privs, out privAssigned))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("PrivilegeCheck failed with the following error: " + errorCode);
         }
         
@@ -324,20 +323,25 @@ public class Module_reg_dump_trans
         
         if (!LookupPrivilegeValue(null, PrivilegeName, out luid))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("LookupPrivilegeValue failed with the following error: " + errorCode);
         }
         
-        LUID_AND_ATTRIBUTES luAttr = new LUID_AND_ATTRIBUTES {Luid = luid,Attributes = SE_PRIVILEGE_ENABLED};
+        LUID_AND_ATTRIBUTES luAttr = new LUID_AND_ATTRIBUTES();
+        luAttr.Luid = luid;
+        luAttr.Attributes = SE_PRIVILEGE_ENABLED;
         
-        TOKEN_PRIVILEGES tp = new TOKEN_PRIVILEGES {PrivilegeCount = 1, Privileges = new LUID_AND_ATTRIBUTES[1]};
+        TOKEN_PRIVILEGES tp = new TOKEN_PRIVILEGES();
+        tp.PrivilegeCount = 1;
+        tp.Privileges = new LUID_AND_ATTRIBUTES[1];
         tp.Privileges[0] = luAttr;
+        
         TOKEN_PRIVILEGES oldState = new TOKEN_PRIVILEGES();
         UInt32 returnLength = 0;
         
         if (!AdjustTokenPrivileges(hToken, false, ref tp, 256, ref oldState, out returnLength))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("AdjustTokenPrivileges failed with the following error: " + errorCode);
         }        
     }
@@ -360,7 +364,7 @@ public class Module_reg_dump_trans
         IntPtr currProcHandle = currProc.Handle;
         if (!OpenProcessToken(currProcHandle, TokenAccessLevels.AdjustPrivileges | TokenAccessLevels.Query, out currTkn))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("OpenProcessToken failed with the following error: " + errorCode);
         }
         return currTkn;

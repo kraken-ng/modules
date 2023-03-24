@@ -266,7 +266,7 @@ public class Module_ps
                 myprocs.Add(myproc);
             }
 
-            myprocs.Sort((x, y) => x.pid.CompareTo(y.pid));
+            //myprocs.Sort((x, y) => x.pid.CompareTo(y.pid));
 
             foreach(MyProcess mproc in myprocs)
                 result += mproc + Environment.NewLine;

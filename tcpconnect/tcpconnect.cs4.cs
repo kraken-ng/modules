@@ -39,7 +39,7 @@ public class Module_tcpconnect
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -127,10 +127,10 @@ public class Module_tcpconnect
     {
         try
         {
-            using(var client = new TcpClient())
+            using(TcpClient client = new TcpClient())
             {
-                var result = client.BeginConnect(ipaddr, port, null, null);
-                var success = result.AsyncWaitHandle.WaitOne(timeout);
+                IAsyncResult result = client.BeginConnect(ipaddr, port, null, null);
+                bool success = result.AsyncWaitHandle.WaitOne(timeout);
                 client.EndConnect(result);
                 return success;
             }
@@ -192,11 +192,11 @@ public class Module_tcpconnect
     public string[] execute(string[] args)
     {
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count != 2)
             return new string[]{ERR_CODE, "Invalid arguments provided. Specify an address and port" + Environment.NewLine};
 
-		return doTcpConnect(nargs[0], nargs[1]);
+        return doTcpConnect(nargs[0], nargs[1]);
     }
 
     public string[] go(string cwd, string args, string token)

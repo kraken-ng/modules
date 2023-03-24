@@ -36,7 +36,7 @@ public class Module_sc
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -212,7 +212,7 @@ public class Module_sc
     {
         string result = "";
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count == 0)
         {
             result = "Invalid arguments provided. Specify an action to perform.";

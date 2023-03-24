@@ -37,7 +37,7 @@ public class Module_powerpick
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -258,7 +258,7 @@ public class Module_powerpick
     {
         string result = "";
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count == 0)
         {
             result = "Invalid arguments provided. Specify a command or script to load.";

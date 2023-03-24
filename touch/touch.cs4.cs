@@ -34,7 +34,7 @@ public class Module_touch
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -153,7 +153,7 @@ public class Module_touch
     {
         string result = "";
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count <= 1)
         {
             result = "Invalid arguments provided. Specify datetime and one or multiple files to change date" + Environment.NewLine;

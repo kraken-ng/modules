@@ -37,7 +37,7 @@ public class Module_whoami
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -275,12 +275,12 @@ public class Module_whoami
         {
             using(WindowsIdentity currEntity = WindowsIdentity.GetCurrent())
             {
-                foreach (var groupId in currEntity.Groups)
+                foreach (IdentityReference groupId in currEntity.Groups)
                 {
                     try
                     {
                         SecurityIdentifier s = new SecurityIdentifier(groupId.Value);
-                        var groupAccount = (NTAccount)s.Translate(typeof(NTAccount));
+                        NTAccount groupAccount = (NTAccount)s.Translate(typeof(NTAccount));
 
                         string group_name = (groupAccount.ToString() != "") ? groupAccount.ToString() : "-";
                         string group_id = (groupId.Value != "") ? groupId.Value : "-";
@@ -387,7 +387,7 @@ public class Module_whoami
     {
         string result = "";		
         List<string> nargs = new List<string>(args);
-		
+
         if (nargs.Count == 0)
             return getUserInfo();
         

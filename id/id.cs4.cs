@@ -35,7 +35,7 @@ public class Module_id
 
         if (!ImpersonateLoggedOnUser(targetToken))
         {
-            var errorCode = Marshal.GetLastWin32Error();
+            int errorCode = Marshal.GetLastWin32Error();
             throw new Exception("ImpersonateLoggedOnUser failed with the following error: " + errorCode);
         }
 
@@ -115,12 +115,12 @@ public class Module_id
                 result += " ";
                 result += "groups=";
 
-                foreach (var groupId in currEntity.Groups)
+                foreach (IdentityReference groupId in currEntity.Groups)
                 {
                     try
                     {
                         SecurityIdentifier s = new SecurityIdentifier(groupId.Value);
-                        var groupAccount = (NTAccount)s.Translate(typeof(NTAccount));
+                        NTAccount groupAccount = (NTAccount)s.Translate(typeof(NTAccount));
                         result += groupId.Value + "(" + groupAccount.ToString() + ")";
                         result += ",";
                     }
