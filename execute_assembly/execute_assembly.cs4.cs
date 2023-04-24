@@ -222,8 +222,20 @@ public class Module_execute_assembly
                 return new string[]{ERR_CODE, "Method: '" + as_method + "' not found in Assembly Type: '" + fullTypeName + "'" + Environment.NewLine};
             
             object assembly_instance = Activator.CreateInstance(assembly_type);
-            object assembly_result = assembly_method.Invoke(assembly_instance, new object[] { as_args });
-            result += assembly_result + Environment.NewLine;
+			
+            TextWriter originalConsoleOut = Console.Out;
+			using(StringWriter writer = new StringWriter())
+			{
+				Console.SetOut(writer);
+
+				object assembly_result = assembly_method.Invoke(assembly_instance, new object[] { as_args });
+
+				writer.Flush();
+
+				result = writer.GetStringBuilder().ToString();
+			}
+
+			Console.SetOut(originalConsoleOut);
         }
         catch (Exception ex)
         {
