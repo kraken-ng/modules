@@ -1,1 +1,1 @@
-./sysinfo.cs4.cs
+sysinfo.cs4.cs

@@ -1,1 +1,1 @@
-./ls.cs4.cs
+ls.cs4.cs

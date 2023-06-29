@@ -1,1 +1,1 @@
-./netstat.cs4.cs
+netstat.cs4.cs

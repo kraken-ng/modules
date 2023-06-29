@@ -1,1 +1,1 @@
-./list_tokens.cs4.cs
+list_tokens.cs4.cs

@@ -1,1 +1,1 @@
-./mkdir.cs4.cs
+mkdir.cs4.cs

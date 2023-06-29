@@ -263,6 +263,15 @@ public class Module_download
         return results;
     }
 
+    public static void go_dm(string cwd, string args, string token)
+    {
+        Module_download m = new Module_download();
+        String[] results = m.go(cwd, args, token);
+        Console.WriteLine(results[0]);
+        Console.WriteLine(results[1]);
+        return;
+    }
+
     public static void Main(string[] args)
     {
         Module_download m = new Module_download();

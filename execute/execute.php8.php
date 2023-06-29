@@ -140,7 +140,7 @@ class Module_execute
         elseif (strlen($stdout) > 0 && strlen($stderr) > 0)
             $output = $stdout . PHP_EOL . $stderr;                
 
-        return utf8_encode($output);
+        return @utf8_encode($output);
     }
 
     public function execute($args)

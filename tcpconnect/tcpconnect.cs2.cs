@@ -1,1 +1,1 @@
-./tcpconnect.cs4.cs
+tcpconnect.cs4.cs

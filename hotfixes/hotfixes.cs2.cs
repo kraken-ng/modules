@@ -1,1 +1,1 @@
-./hotfixes.cs4.cs
+hotfixes.cs4.cs

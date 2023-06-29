@@ -1,1 +1,1 @@
-./execute_assembly.cs4.cs
+execute_assembly.cs4.cs

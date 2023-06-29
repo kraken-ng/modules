@@ -1,1 +1,1 @@
-./touch.cs4.cs
+touch.cs4.cs

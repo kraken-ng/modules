@@ -523,6 +523,15 @@ public class Module_list_tokens
         return results;
     }
 
+    public static void go_dm(string cwd, string args, string token)
+    {
+        Module_list_tokens m = new Module_list_tokens();
+        String[] results = m.go(cwd, args, token);
+        Console.WriteLine(results[0]);
+        Console.WriteLine(results[1]);
+        return;
+    }
+
     public static void Main(string[] args)
     {
         Module_list_tokens m = new Module_list_tokens();

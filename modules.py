@@ -276,6 +276,27 @@ MODULE_COMMANDS = [
         "formater" : "default"
     },
     {
+        "name" : "enum_antivirus",
+        "description" : "Enumerate registered antivirus (via WMI)",
+        "author" : "github.com/GhostPack/Seatbelt",
+        "template" : "enum_antivirus",
+        "examples" : [
+            "enum_antivirus"
+        ],
+        "so" : [
+            {
+                "name" : "Windows",
+                "agents" : ["cs"]
+            }
+        ],
+        "references": [
+            "System.Management.dll"
+        ],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
         "name" : "execute",
         "description" : "Execute a binary or command and retrieve output",
         "author" : "@secu_x11",
@@ -329,9 +350,9 @@ MODULE_COMMANDS = [
         "author" : "@secu_x11",
         "template" : "execute_assembly",
         "examples" : [
-            "execute_assembly -f ~/Kraken/test/net_assemblies/badpotato_net40_x64.exe -n BadPotato -c Program -m call",
-            "execute_assembly -f ~/Kraken/test/net_assemblies/dummy_net40_x64.exe -n BadPotato -c Program -m call -- Ping",
-            "execute_assembly -f ~/Kraken/test/net_assemblies/dummy_net40_x64.exe -n BadPotato -c Program -m call -- Ping -h --help",
+            "execute_assembly -f ~/Kraken/test/net_assemblies/Badpotato_net40_x64.exe -n BadPotato -c Program -m Main",
+            "execute_assembly -f ~/Kraken/test/net_assemblies/dummy_net40_x64.exe -n Dummy -c Program -m Main -- Ping",
+            "execute_assembly -f ~/Kraken/test/net_assemblies/dummy_net20_x64.exe -n Dummy -c Program -m Main -- Ping -h --help",
         ],
         "so" : [
             {

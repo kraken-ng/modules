@@ -1,1 +1,1 @@
-./whoami.cs4.cs
+whoami.cs4.cs

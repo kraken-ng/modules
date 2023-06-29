@@ -1,1 +1,1 @@
-./driveinfo.cs4.cs
+driveinfo.cs4.cs

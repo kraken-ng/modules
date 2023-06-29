@@ -1,1 +1,1 @@
-./dump_iis_secrets.cs4.cs
+dump_iis_secrets.cs4.cs

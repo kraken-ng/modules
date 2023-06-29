@@ -1,1 +1,1 @@
-./powerpick.cs4.cs
+powerpick.cs4.cs

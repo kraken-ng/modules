@@ -314,6 +314,15 @@ public class Module_ps
         return results;
     }
 
+    public static void go_dm(string cwd, string args, string token)
+    {
+        Module_ps m = new Module_ps();
+        String[] results = m.go(cwd, args, token);
+        Console.WriteLine(results[0]);
+        Console.WriteLine(results[1]);
+        return;
+    }
+
     public static void Main(string[] args)
     {
         Module_ps m = new Module_ps();

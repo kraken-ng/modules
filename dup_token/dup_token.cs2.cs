@@ -1,1 +1,1 @@
-./dup_token.cs4.cs
+dup_token.cs4.cs

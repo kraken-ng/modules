@@ -203,6 +203,15 @@ public class Module_impersonate
         return results;
     }
 
+    public static void go_dm(string cwd, string args, string token)
+    {
+        Module_impersonate m = new Module_impersonate();
+        String[] results = m.go(cwd, args, token);
+        Console.WriteLine(results[0]);
+        Console.WriteLine(results[1]);
+        return;
+    }
+
     public static void Main(string[] args)
     {
         Module_impersonate m = new Module_impersonate();

@@ -1,1 +1,1 @@
-./show_integrity.cs4.cs
+show_integrity.cs4.cs

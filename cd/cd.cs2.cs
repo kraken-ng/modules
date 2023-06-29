@@ -1,1 +1,1 @@
-./cd.cs4.cs
+cd.cs4.cs

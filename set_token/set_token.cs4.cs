@@ -195,6 +195,15 @@ public class Module_set_token
         return results;
     }
 
+    public static void go_dm(string cwd, string args, string token)
+    {
+        Module_set_token m = new Module_set_token();
+        String[] results = m.go(cwd, args, token);
+        Console.WriteLine(results[0]);
+        Console.WriteLine(results[1]);
+        return;
+    }
+
     public static void Main(string[] args)
     {
         Module_set_token m = new Module_set_token();

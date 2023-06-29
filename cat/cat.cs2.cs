@@ -1,1 +1,1 @@
-./cat.cs4.cs
+cat.cs4.cs

@@ -1,1 +1,1 @@
-./execute_with_token.cs4.cs
+execute_with_token.cs4.cs

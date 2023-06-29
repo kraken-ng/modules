@@ -7,18 +7,14 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-using System.Net;
-using System.Net.Sockets;
+using System.Management;
 
 
-public class Module_tcpconnect
+public class Module_enum_antivirus
 {
     public const string SUCC_CODE       = "0";
     public const string ERR_CODE        = "1";
     public const string NON_TOKEN_VALUE = "0";
-    public const int MIN_PORT_NUMBER    = 1;
-    public const int MAX_PORT_NUMBER    = 65535;
-    public const double SOCKET_TIMEOUT  = 0.5;
 
     [DllImport("advapi32.dll", SetLastError = true)]
     public static extern bool ImpersonateLoggedOnUser(IntPtr hToken);
@@ -104,99 +100,36 @@ public class Module_tcpconnect
         return arguments_parsed.ToArray();
     }
 
-    private string FormatAddress(IPAddress address)
+    private string[] doEnumAntivirus()
     {
-        switch (address.AddressFamily)
-        {
-            case System.Net.Sockets.AddressFamily.InterNetwork:
-                return address.ToString();
-            case System.Net.Sockets.AddressFamily.InterNetworkV6:
-                return "[" + address.ToString() + "]";
-            default:
-                return address.ToString();
-        }
-    }
+        string result = "Name\tSignedProductExe\tSignedReportingExe\tProductState\tTimestamp" + Environment.NewLine;
 
-    private bool isNumeric(string s)
-    {
-        int n;
-        return int.TryParse(s, out n);
-    }
-
-    private bool IsPortOpen(IPAddress ipaddr, int port, TimeSpan timeout)
-    {
         try
         {
-            using(TcpClient client = new TcpClient())
+            ManagementObjectSearcher query = new ManagementObjectSearcher(@"root\SecurityCenter2", "SELECT * FROM AntiVirusProduct");
+            ManagementObjectCollection queryCollection = query.Get();
+
+            foreach (ManagementObject mo in queryCollection)
             {
-                IAsyncResult result = client.BeginConnect(ipaddr, port, null, null);
-                bool success = result.AsyncWaitHandle.WaitOne(timeout);
-                client.EndConnect(result);
-                return success;
+                result += mo["DisplayName"] + "\t";
+                result += mo["pathToSignedProductExe"] + "\t";
+                result += mo["pathToSignedReportingExe"] + "\t";
+                result += mo["productState"].ToString() + "\t";
+                result += mo["timestamp"] + Environment.NewLine;
             }
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private string[] doTcpConnect(string addr, string port)
-    {
-        string result = "";
-        try
-        {
-            if (isNumeric(port) == false)
-                return new string[]{ERR_CODE, "Invalid port '" + port + "': not a number" + Environment.NewLine};
-
-            int port_val = Int32.Parse(port);
-            if (port_val < MIN_PORT_NUMBER || port_val > MAX_PORT_NUMBER)
-                return new string[]{ERR_CODE, "Invalid port: '" + port + "'" + Environment.NewLine};
-
-            IPAddress[] ipaddrs;
-            try
-            {
-                ipaddrs = Dns.GetHostAddresses(addr);
-            }
-            catch(Exception ex)
-            {
-                return new string[]{ERR_CODE, "Can not GetHostAddresses from '" + addr + "' : " + ex.Message + Environment.NewLine};
-            }
-
-            List<string> data = new List<string>();
-            foreach(IPAddress ipaddr in ipaddrs)
-            {
-                string line = "";
-                TimeSpan timeout = TimeSpan.FromSeconds(SOCKET_TIMEOUT);
-                if (IsPortOpen(ipaddr, port_val, timeout))
-                    line = FormatAddress(ipaddr) + ":" + port + " (open)";
-                else
-                    line = FormatAddress(ipaddr) + ":" + port + " (closed)";
-                
-                if (data.Contains(line) == false)
-                    data.Add(line);
-            }
-
-            foreach(string d in data)
-                result += d + Environment.NewLine;
-            result = result.TrimEnd('\n');
         }
         catch(Exception ex)
         {
             result += ex.ToString() + Environment.NewLine;
             return new string[]{ERR_CODE, result};
         }
+
         return new string[]{SUCC_CODE, result};
     }
 
     public string[] execute(string[] args)
     {
-        List<string> nargs = new List<string>(args);
-
-        if (nargs.Count != 2)
-            return new string[]{ERR_CODE, "Invalid arguments provided. Specify an address and port" + Environment.NewLine};
-
-        return doTcpConnect(nargs[0], nargs[1]);
+        return doEnumAntivirus();
     }
 
     public string[] go(string cwd, string args, string token)
@@ -230,7 +163,7 @@ public class Module_tcpconnect
 
     public static void go_dm(string cwd, string args, string token)
     {
-        Module_tcpconnect m = new Module_tcpconnect();
+        Module_enum_antivirus m = new Module_enum_antivirus();
         String[] results = m.go(cwd, args, token);
         Console.WriteLine(results[0]);
         Console.WriteLine(results[1]);
@@ -239,7 +172,7 @@ public class Module_tcpconnect
 
     public static void Main(string[] args)
     {
-        Module_tcpconnect m = new Module_tcpconnect();
+        Module_enum_antivirus m = new Module_enum_antivirus();
         String[] results = m.execute(args);
         Console.WriteLine(results[0]);
         Console.WriteLine(results[1]);
