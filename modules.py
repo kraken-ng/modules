@@ -5,6 +5,25 @@
 ###################################################################################################
 MODULE_COMMANDS = [
     {
+        "name" : "amsi_patch",
+        "description" : "Load and patch AMSI dll in memory",
+        "author" : "@secu_x11",
+        "template" : "amsi_patch",
+        "examples" : [
+            "amsi_patch"
+        ],
+        "so" : [
+            {
+                "name" : "Windows",
+                "agents" : ["cs"]
+            }
+        ],
+        "references" : [],
+        "args": [],
+        "dispatcher" : "amsi_patch",
+        "formater" : "default"
+    },
+    {
         "name" : "cat",
         "description" : "Read file contents",
         "author" : "@secu_x11",

