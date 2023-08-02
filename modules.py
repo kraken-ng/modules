@@ -369,9 +369,9 @@ MODULE_COMMANDS = [
         "author" : "@secu_x11",
         "template" : "execute_assembly",
         "examples" : [
-            "execute_assembly -f ~/Kraken/test/net_assemblies/Badpotato_net40_x64.exe -n BadPotato -c Program -m Main",
-            "execute_assembly -f ~/Kraken/test/net_assemblies/dummy_net40_x64.exe -n Dummy -c Program -m Main -- Ping",
-            "execute_assembly -f ~/Kraken/test/net_assemblies/dummy_net20_x64.exe -n Dummy -c Program -m Main -- Ping -h --help",
+            "execute_assembly -f ~/Kraken/net_assemblies/bin/BadPotato-mod/BadPotato_net40_x64.exe -n BadPotato -c Program -m Main",
+            "execute_assembly -f ~/Kraken/net_assemblies/bin/Dummy/dummy_net40_x64.exe -n Dummy -c Program -m Main -- Ping",
+            "execute_assembly -f ~/Kraken/net_assemblies/bin/Dummy/dummy_net20_x64.exe -n Dummy -c Program -m Main -- Ping -h --help",
         ],
         "so" : [
             {
