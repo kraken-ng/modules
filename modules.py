@@ -369,9 +369,9 @@ MODULE_COMMANDS = [
         "author" : "@secu_x11",
         "template" : "execute_assembly",
         "examples" : [
-            "execute_assembly -f ~/Kraken/net_assemblies/bin/BadPotato-mod/BadPotato_net40_x64.exe -n BadPotato -c Program -m Main",
-            "execute_assembly -f ~/Kraken/net_assemblies/bin/Dummy/dummy_net40_x64.exe -n Dummy -c Program -m Main -- Ping",
-            "execute_assembly -f ~/Kraken/net_assemblies/bin/Dummy/dummy_net20_x64.exe -n Dummy -c Program -m Main -- Ping -h --help",
+            "execute_assembly -f ~/net_assemblies/bin/BadPotato-mod/BadPotato_net40_x64.exe -n BadPotato -c Program -m Main",
+            "execute_assembly -f ~/net_assemblies/bin/Dummy/dummy_net40_x64.exe -n Dummy -c Program -m Main -- Ping",
+            "execute_assembly -f ~/net_assemblies/bin/Dummy/dummy_net20_x64.exe -n Dummy -c Program -m Main -- Ping -h --help",
         ],
         "so" : [
             {
@@ -531,6 +531,46 @@ MODULE_COMMANDS = [
                 },
                 "local_file": {
                     "help": "Directory/ies to search",
+                    "nargs" : "*",
+                    "type":  str
+                }
+            }
+        ],
+        "dispatcher" : "default",
+        "formater" : "default"
+    },
+    {
+        "name" : "head",
+        "description" : "Read first N lines from a text file/s",
+        "author" : "@secu_x11",
+        "template" : "head",
+        "examples" : [
+            "head /etc/passwd",
+            "head -n 50 /etc/passwd",
+            "head -n 25 /etc/passwd /etc/issue"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references" : [],
+        "args": [
+            {
+                "-n": {
+                    "help": "Number of lines to be readed (default: 10)",
+                    "nargs": 1,
+                    "type":  int,
+                    "default": 10,
+                    "required": 0
+                },
+                "files": {
+                    "help": "File or files to read",
                     "nargs" : "*",
                     "type":  str
                 }
@@ -1092,6 +1132,46 @@ MODULE_COMMANDS = [
         ],
         "references" : [],
         "args" : [],
+        "dispatcher" : "default",
+        "formater" : "default"
+    },
+    {
+        "name" : "tail",
+        "description" : "Read last N lines from a text file/s",
+        "author" : "@secu_x11",
+        "template" : "tail",
+        "examples" : [
+            "tail /etc/passwd",
+            "tail -n 50 /etc/passwd",
+            "tail -n 25 /etc/passwd /etc/issue"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references" : [],
+        "args": [
+            {
+                "-n": {
+                    "help": "Number of lines to be readed (default: 10)",
+                    "nargs": 1,
+                    "type":  int,
+                    "default": 10,
+                    "required": 0
+                },
+                "files": {
+                    "help": "File or files to read",
+                    "nargs" : "*",
+                    "type":  str
+                }
+            }
+        ],
         "dispatcher" : "default",
         "formater" : "default"
     },
