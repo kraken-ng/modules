@@ -316,6 +316,75 @@ MODULE_COMMANDS = [
         "formater" : "columns_header"
     },
     {
+        "name" : "enum_disabled_functions",
+        "description" : "Enumerate disabled functions in PHP",
+        "author" : "@secu_x11",
+        "template" : "enum_disabled_functions",
+        "examples" : [
+            "enum_disabled_functions"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references": [],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
+        "name" : "enum_loaded_extensions",
+        "description" : "Enumerate loaded extensions in PHP",
+        "author" : "@secu_x11",
+        "template" : "enum_loaded_extensions",
+        "examples" : [
+            "enum_loaded_extensions"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references": [],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
+        "name" : "env",
+        "description" : "Enumerate environment variables",
+        "author" : "@secu_x11",
+        "template" : "env",
+        "examples" : [
+            "env"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references": [],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
         "name" : "execute",
         "description" : "Execute a binary or command and retrieve output",
         "author" : "@secu_x11",
@@ -576,6 +645,29 @@ MODULE_COMMANDS = [
                 }
             }
         ],
+        "dispatcher" : "default",
+        "formater" : "default"
+    },
+    {
+        "name" : "hostname",
+        "description" : "Show the hostname of the compromised machine",
+        "author" : "@secu_x11",
+        "template" : "hostname",
+        "examples" : [
+            "hostname"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references": [],
+        "args": [],
         "dispatcher" : "default",
         "formater" : "default"
     },
@@ -1328,30 +1420,7 @@ MODULE_COMMANDS = [
         ],
         "dispatcher" : "upload",
         "formater" : "default"
-    },
-    {
-        "name" : "webinfo",
-        "description" : "Get basic web server info about compromised machine",
-        "author" : "@secu_x11",
-        "template" : "webinfo",
-        "examples" : [
-            "webinfo"
-        ],
-        "so" : [
-            {
-                "name" : "Linux",
-                "agents" : ["php"]
-            },
-            {
-                "name" : "Windows",
-                "agents" : ["php"]
-            }
-        ],
-        "references" : [],
-        "args" : [],
-        "dispatcher" : "default",
-        "formater" : "default"
-    },
+    }
     {
         "name" : "whoami",
         "description" : "Lists user, group or privilege information",
