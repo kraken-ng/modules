@@ -1081,6 +1081,58 @@ MODULE_COMMANDS = [
         "formater" : "default"
     },
     {
+        "name" : "reg_query",
+        "description" : "Query registry",
+        "author" : "@secu_x11",
+        "template" : "reg_query",
+        "examples" : [
+            "reg_query HKEY_LOCAL_MACHINE SAM /tmp/SAM",
+            "reg_query HKEY_LOCAL_MACHINE SYSTEM\\\\ControlSet001\\\\Control\\\\Lsa"
+        ],
+        "so" : [
+            {
+                "name" : "Windows",
+                "agents" : ["cs"]
+            }
+        ],
+        "references": [],
+        "args": [
+            {
+                "root_key": {
+                    "help": "Registry Root Key",
+                    "nargs": 1,
+                    "choices" : [
+                       "HKEY_CLASSES_ROOT",
+                       "HKEY_CURRENT_USER",
+                       "HKEY_LOCAL_MACHINE",
+                       "HKEY_USERS",
+                       "HKEY_PERFORMANCE_DATA",
+                       "HKEY_CURRENT_CONFIG",
+                       "HKEY_DYN_DATA",
+                       "HKCR",
+                       "HKCU",
+                       "HKLM",
+                       "HKU"
+                    ],
+                    "type":  str
+                },
+                "sub_key": {
+                    "help": "Name of the Registry Sub Key to be queried",
+                    "nargs": 1,
+                    "type":  str
+                },
+                "-f": {
+                    "help": "Name of the Value/s to be queried",
+                    "nargs" : "*",
+                    "type":  str,
+                    "required" : 0
+                }
+            }
+        ],
+        "dispatcher" : "reg_query",
+        "formater" : "default"
+    },
+    {
         "name" : "rm",
         "description" : "Remove file or multiple files",
         "author" : "@secu_x11",
@@ -1420,7 +1472,7 @@ MODULE_COMMANDS = [
         ],
         "dispatcher" : "upload",
         "formater" : "default"
-    }
+    },
     {
         "name" : "whoami",
         "description" : "Lists user, group or privilege information",
@@ -1455,6 +1507,41 @@ MODULE_COMMANDS = [
                     "help": "Flag to list user privileges information",
                     "action" : "store_true",
                     "required": 0
+                }
+            }
+        ],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
+        "name" : "wmi_query",
+        "description" : "Perform a WMI (Windows Management Instrumentation) query",
+        "author" : "@secu_x11",
+        "template" : "wmi_query",
+        "examples" : [
+            "wmi_query \"SELECT * FROM Win32_Product\"",
+            "wmi_query \"SELECT * FROM Win32_Product\" Name Caption InstallDate"
+        ],
+        "so" : [
+            {
+                "name" : "Windows",
+                "agents" : ["cs"]
+            }
+        ],
+        "references": [
+            "System.Management.dll"
+        ],
+        "args": [
+            {
+                "query": {
+                    "help": "WMI Query string",
+                    "nargs": 1,
+                    "type":  str
+                },
+                "fields": {
+                    "help": "WMI Fields to be obtained from the response",
+                    "nargs" : "*",
+                    "type":  str
                 }
             }
         ],
