@@ -13,6 +13,7 @@ using System.Diagnostics;
 public class MyProcess
 {
     public string name;
+    public string user;
     public int pid;
     public int ppid;
     public int session;
@@ -24,10 +25,11 @@ public class MyProcess
     public const string SEPARATOR = "\t";
  
  
-    public MyProcess(string name, int pid, int ppid, int session, string memory, 
+    public MyProcess(string name, string user, int pid, int ppid, int session, string memory, 
                      string start_time, string elapsed_time, string path)
     {
         this.name = name;
+        this.user = user;
         this.pid = pid;
         this.ppid = ppid;
         this.session = session;
@@ -40,7 +42,7 @@ public class MyProcess
     public override string ToString()
     {
         string output = "";
-        output += this.name + SEPARATOR + this.pid.ToString() + SEPARATOR;
+        output += this.name + SEPARATOR + this.user + SEPARATOR + this.pid.ToString() + SEPARATOR;
         if (this.ppid > 0)
             output += this.ppid.ToString();
         else
@@ -59,11 +61,53 @@ public class Module_ps
     public const string NON_TOKEN_VALUE = "0";
     public const string DATE_FORMAT     = "dd/MM/yyyy-HH:mm:ss";
     
+
+    [Flags]
+    public enum ProcessAccessFlags : uint
+    {
+        All = 0x001F0FFF,
+        Terminate = 0x00000001,
+        CreateThread = 0x00000002,
+        VirtualMemoryOperation = 0x00000008,
+        VirtualMemoryRead = 0x00000010,
+        VirtualMemoryWrite = 0x00000020,
+        DuplicateHandle = 0x00000040,
+        CreateProcess = 0x000000080,
+        SetQuota = 0x00000100,
+        SetInformation = 0x00000200,
+        QueryInformation = 0x00000400,
+        QueryLimitedInformation = 0x00001000,
+        Synchronize = 0x00100000
+    }
+
     [DllImport("advapi32.dll", SetLastError = true)]
-    public static extern bool ImpersonateLoggedOnUser(IntPtr hToken);
+    public static extern bool ImpersonateLoggedOnUser(
+        IntPtr hToken
+    );
 
     [DllImport("advapi32.dll", SetLastError = true)]
     public static extern bool RevertToSelf();
+    
+    [DllImport("advapi32.dll", SetLastError = true)]
+    public static extern bool OpenProcessToken(
+        IntPtr ProcessHandle,
+        uint DesiredAccess,
+        out IntPtr TokenHandle
+    );
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool CloseHandle(
+        IntPtr hObject
+    );
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr OpenProcess(
+        uint processAccess,
+        bool bInheritHandle,
+        uint processId
+    );
+
 
     private void ImpersonateWithToken(string token)
     {
@@ -215,18 +259,48 @@ public class Module_ps
       return mp1.pid.CompareTo(mp2.pid);
     }
 
+    private string GetProcessUser(int processId)
+    {
+        IntPtr processHandle = IntPtr.Zero;
+        IntPtr tokenHandle = IntPtr.Zero;
+        string username = "?";
+        try
+        {
+            uint target_proc_id = Convert.ToUInt32(processId);
+            processHandle = OpenProcess((uint)ProcessAccessFlags.QueryLimitedInformation, true, target_proc_id);
+            OpenProcessToken(processHandle, 8, out tokenHandle);
+            WindowsIdentity wi = new WindowsIdentity(tokenHandle);
+            username = wi.Name;
+        }
+        catch (Exception ex)
+        {
+            // for debugging purposes
+            // username = ex.ToString();
+        }
+        finally
+        {
+            if (tokenHandle != IntPtr.Zero)
+                CloseHandle(tokenHandle);
+            if (processHandle != IntPtr.Zero)
+                CloseHandle(processHandle);
+        }
+        return username;
+    }
+
+
     private string[] doListProcesses()
     {
         string result = "";
         try
         {
-            result += "NAME\tPID\tPPID\tSESSION\tMEMORY\tSTART\tELAPSED\tPATH" + Environment.NewLine;
+            result += "NAME\tUSER\tPID\tPPID\tSESSION\tMEMORY\tSTART\tELAPSED\tPATH" + Environment.NewLine;
             Process[] allProcs = Process.GetProcesses();
             List<MyProcess> myprocs = new List<MyProcess>();
 
             foreach(Process proc in allProcs)
             {
                 string process_name = proc.ProcessName;
+                string process_username = "?";
                 int process_pid = proc.Id;
                 int process_ppid = -1;
                 int process_session = proc.SessionId;
@@ -234,6 +308,11 @@ public class Module_ps
                 string process_start = "?";
                 string process_elapsed = "?";
                 string process_path = "?";
+
+                try
+                {
+                    process_username = GetProcessUser(process_pid);
+                } catch { }
 
                 try
                 {
@@ -255,6 +334,7 @@ public class Module_ps
 
                 MyProcess myproc = new MyProcess(
                     process_name,
+                    process_username,
                     process_pid,
                     process_ppid,
                     process_session,

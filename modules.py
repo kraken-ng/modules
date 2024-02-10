@@ -316,6 +316,75 @@ MODULE_COMMANDS = [
         "formater" : "columns_header"
     },
     {
+        "name" : "enum_disabled_functions",
+        "description" : "Enumerate disabled functions in PHP",
+        "author" : "@secu_x11",
+        "template" : "enum_disabled_functions",
+        "examples" : [
+            "enum_disabled_functions"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references": [],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
+        "name" : "enum_loaded_extensions",
+        "description" : "Enumerate loaded extensions in PHP",
+        "author" : "@secu_x11",
+        "template" : "enum_loaded_extensions",
+        "examples" : [
+            "enum_loaded_extensions"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references": [],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
+        "name" : "env",
+        "description" : "Enumerate environment variables",
+        "author" : "@secu_x11",
+        "template" : "env",
+        "examples" : [
+            "env"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references": [],
+        "args": [],
+        "dispatcher" : "default",
+        "formater" : "columns_header"
+    },
+    {
         "name" : "execute",
         "description" : "Execute a binary or command and retrieve output",
         "author" : "@secu_x11",
@@ -369,9 +438,9 @@ MODULE_COMMANDS = [
         "author" : "@secu_x11",
         "template" : "execute_assembly",
         "examples" : [
-            "execute_assembly -f ~/Kraken/net_assemblies/bin/BadPotato-mod/BadPotato_net40_x64.exe -n BadPotato -c Program -m Main",
-            "execute_assembly -f ~/Kraken/net_assemblies/bin/Dummy/dummy_net40_x64.exe -n Dummy -c Program -m Main -- Ping",
-            "execute_assembly -f ~/Kraken/net_assemblies/bin/Dummy/dummy_net20_x64.exe -n Dummy -c Program -m Main -- Ping -h --help",
+            "execute_assembly -f net_assemblies/bin/BadPotato-mod/BadPotato_net40_x64.exe -n BadPotato -c Program -m Main",
+            "execute_assembly -f net_assemblies/bin/Dummy/dummy_net40_x64.exe -n Dummy -c Program -m Main -- Ping",
+            "execute_assembly -f net_assemblies/bin/Dummy/dummy_net20_x64.exe -n Dummy -c Program -m Main -- Ping -h --help",
         ],
         "so" : [
             {
@@ -536,6 +605,69 @@ MODULE_COMMANDS = [
                 }
             }
         ],
+        "dispatcher" : "default",
+        "formater" : "default"
+    },
+    {
+        "name" : "head",
+        "description" : "Read first N lines from a text file/s",
+        "author" : "@secu_x11",
+        "template" : "head",
+        "examples" : [
+            "head /etc/passwd",
+            "head -n 50 /etc/passwd",
+            "head -n 25 /etc/passwd /etc/issue"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references" : [],
+        "args": [
+            {
+                "-n": {
+                    "help": "Number of lines to be readed (default: 10)",
+                    "nargs": 1,
+                    "type":  int,
+                    "default": 10,
+                    "required": 0
+                },
+                "files": {
+                    "help": "File or files to read",
+                    "nargs" : "*",
+                    "type":  str
+                }
+            }
+        ],
+        "dispatcher" : "default",
+        "formater" : "default"
+    },
+    {
+        "name" : "hostname",
+        "description" : "Show the hostname of the compromised machine",
+        "author" : "@secu_x11",
+        "template" : "hostname",
+        "examples" : [
+            "hostname"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references": [],
+        "args": [],
         "dispatcher" : "default",
         "formater" : "default"
     },
@@ -762,6 +894,63 @@ MODULE_COMMANDS = [
         "formater" : "default"
     },
     {
+        "name" : "net",
+        "description" : "Manages user accounts, groups, and domain-specific network settings",
+        "author" : "@CapiJ",
+        "template" : "net",
+        "examples" : [
+            "net user list .",
+            "net user list lab.local", 
+            "net user add . testlocaluser P4ssw0rd",
+            "net user add lab.local testdomainuser P4ssw0rd",
+            "net user info . testlocaluser",
+            "net user edit lab.local testdomainuser P4ssw0rd",
+            "net user delete . testlocaluser",
+            "net group list .",
+            "net group add . testlocaluser Administrators",
+            "net group info lab.local Administrators"
+        ],
+        "so" : [
+            {
+                "name" : "Windows",
+                "agents" : ["cs"]
+            }
+        ],
+        "references" : [],
+        "args" : [
+            {
+                "command": {
+                    "help": "Precede specific operations.",
+                    "nargs": 1,
+                    "type": str,
+                    "choices" : [
+                       "user",
+                       "group"
+                    ],
+                },
+                "action": {
+                    "help": "Dictating the operation type.",
+                    "nargs": 1,
+                    "type": str,
+                    "choices" : [
+                       "list",
+                       "add",
+                       "edit",
+                       "info",
+                       "delete"
+                    ],
+                },
+                "arguments": {
+                    "help": "Optional arguments to refine the command. To target local machine operations, use a period (.). For domain-specific operations, specify the domain name.",
+                    "nargs": "*",
+                    "type": str
+                }
+            }
+        ],
+        "dispatcher" : "default",
+        "formater" : "columns"
+    },
+    {
         "name" : "netstat",
         "description" : "Show listening ports, arp table and machine's net routes",
         "author" : "@secu_x11",
@@ -845,7 +1034,7 @@ MODULE_COMMANDS = [
     {
         "name" : "ps",
         "description" : "List the processes running on the machine",
-        "author" : "@secu_x11",
+        "author" : "@secu_x11, @CapiJ",
         "template" : "ps",
         "examples" : [
             "ps"
@@ -898,55 +1087,6 @@ MODULE_COMMANDS = [
         ],
         "dispatcher" : "pspy",
         "formater" : "pspy"
-    },
-    {
-        "name" : "reg_dump_trans",
-        "description" : "Extract a registry key using a Transacted File (SeBackup or Admin rights are required)",
-        "author" : "@secu_x11, @xassiz, @antuache",
-        "template" : "reg_dump_trans",
-        "examples" : [
-            "reg_dump_trans HKEY_LOCAL_MACHINE SAM /tmp/SAM",
-            "reg_dump_trans HKEY_LOCAL_MACHINE SECURITY /tmp/SECURITY",
-            "reg_dump_trans HKEY_LOCAL_MACHINE SYSTEM /tmp/SYSTEM",
-            "reg_dump_trans HKEY_LOCAL_MACHINE SYSTEM\\\\ControlSet001\\\\Control\\\\Lsa /tmp/LSA"
-        ],
-        "so" : [
-            {
-                "name" : "Windows",
-                "agents" : ["cs"]
-            }
-        ],
-        "references": [],
-        "args": [
-            {
-                "root_key": {
-                    "help": "Registry Root Key",
-                    "nargs": 1,
-                    "choices" : [
-                       "HKEY_CLASSES_ROOT",
-                       "HKEY_CURRENT_USER",
-                       "HKEY_LOCAL_MACHINE",
-                       "HKEY_USERS",
-                       "HKEY_PERFORMANCE_DATA",
-                       "HKEY_CURRENT_CONFIG",
-                       "HKEY_DYN_DATA"
-                    ],
-                    "type":  str
-                },
-                "sub_key": {
-                    "help": "Name of the Registry Sub Key to be extracted",
-                    "nargs": 1,
-                    "type":  str
-                },
-                "reg_file": {
-                    "help": "Local Filepath to write Registry Key content",
-                    "nargs": 1,
-                    "type":  str
-                }
-            }
-        ],
-        "dispatcher" : "reg_dump_trans",
-        "formater" : "default"
     },
     {
         "name" : "rm",
@@ -1092,6 +1232,46 @@ MODULE_COMMANDS = [
         ],
         "references" : [],
         "args" : [],
+        "dispatcher" : "default",
+        "formater" : "default"
+    },
+    {
+        "name" : "tail",
+        "description" : "Read last N lines from a text file/s",
+        "author" : "@secu_x11",
+        "template" : "tail",
+        "examples" : [
+            "tail /etc/passwd",
+            "tail -n 50 /etc/passwd",
+            "tail -n 25 /etc/passwd /etc/issue"
+        ],
+        "so" : [
+            {
+                "name" : "Linux",
+                "agents" : ["php"]
+            },
+            {
+                "name" : "Windows",
+                "agents" : ["php"]
+            }
+        ],
+        "references" : [],
+        "args": [
+            {
+                "-n": {
+                    "help": "Number of lines to be readed (default: 10)",
+                    "nargs": 1,
+                    "type":  int,
+                    "default": 10,
+                    "required": 0
+                },
+                "files": {
+                    "help": "File or files to read",
+                    "nargs" : "*",
+                    "type":  str
+                }
+            }
+        ],
         "dispatcher" : "default",
         "formater" : "default"
     },
@@ -1247,29 +1427,6 @@ MODULE_COMMANDS = [
             }
         ],
         "dispatcher" : "upload",
-        "formater" : "default"
-    },
-    {
-        "name" : "webinfo",
-        "description" : "Get basic web server info about compromised machine",
-        "author" : "@secu_x11",
-        "template" : "webinfo",
-        "examples" : [
-            "webinfo"
-        ],
-        "so" : [
-            {
-                "name" : "Linux",
-                "agents" : ["php"]
-            },
-            {
-                "name" : "Windows",
-                "agents" : ["php"]
-            }
-        ],
-        "references" : [],
-        "args" : [],
-        "dispatcher" : "default",
         "formater" : "default"
     },
     {
