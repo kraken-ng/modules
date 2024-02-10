@@ -49,7 +49,8 @@ class Module_env
         $output = "Env Variable\tEnv Value" . PHP_EOL;
         foreach ($_ENV as $key => $value)
         {
-            $output .= $key . "\t" . $value . PHP_EOL;
+            $sanitized_val = str_replace("\t", " ", $value);
+            $output .= $key . "\t" . $sanitized_val . PHP_EOL;
         }
         return $output;
     }
