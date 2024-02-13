@@ -339,7 +339,7 @@ public class Module_net
         List<string> globalGroups = new List<string>();
         IntPtr buffer;
         int entriesRead, totalEntries;
-        int result = NetUserGetGroups(null, username, 0, out buffer, MAXPREFERREDLENGTH, out entriesRead, out totalEntries);
+        int result = NetUserGetGroups(domain, username, 0, out buffer, MAXPREFERREDLENGTH, out entriesRead, out totalEntries);
         if (result == 0)
         {
             for (int i = 0; i < entriesRead; i++)
